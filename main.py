@@ -4,6 +4,7 @@ import pandas as pd
 from pgmpy.models import BayesianModel
 from copy import deepcopy
 from pgmpy.estimators import K2Score, BicScore, HillClimbSearch, ExhaustiveSearch
+from pgmpy.sampling import BayesianModelSampling
 
 def select(population, _size):
   eval_pop = np.array([sum(x) for x in population])
@@ -33,14 +34,22 @@ if __name__ == '__main__':
     data[column_name] = selected_population.T[index]
 
   # create Network from data by HillClimbSearch, BicScore
-  network = ExhaustiveSearch(data, scoring_method=BicScore(data))
+  network = HillClimbSearch(data, scoring_method=BicScore(data))
   best_model = network.estimate() # DAGクラス
-  edges = best_model.edges()
-  nodes = best_model.nodes()
-  print(edges)
-  print(nodes)
+  edges = list(best_model.edges())
+  nodes = list(best_model.nodes())
+  # print(edges)
+  # print(nodes)
 
-  # # create network as BayesianModel class
-  # bayesian_model = BayesianModel(best_model)
-  # print(bayesian_model.nodes())
-  
+  # create network as BayesianModel class
+  bayesian_model = BayesianModel(edges)
+  bayesian_model.add_nodes_from(nodes)
+  bayesian_model.fit(data)
+  cpds = bayesian_model.get_cpds()
+  # for cpd in cpds:
+    # print(cpd, "\n")
+
+  # create Model to sample data
+  inference = BayesianModelSampling(bayesian_model)
+  new_data = inference.forward_sample(size=50, return_type='dataframe')
+  print(new_data)

@@ -15,17 +15,23 @@ class Boa:
     self.function = Onemax()
 
   def do_one_generation(self):
-    self.evaluate()
     self.population = self.get_sorted_population()
     selected_array = deepcopy(self.population.array[0:self.select_size])
     # ネットワーク生成、推定
     self.create_network(selected_array)
     self.bayesianNetwork.fit()
-    cpds = self.bayesianNetwork.model.get_cpds()
 
     # サンプル取得
-    sampled_data = self.bayesianNetwork.sample_data(self.new_data_size)
-    print(sampled_data)
+    sampled_array = self.bayesianNetwork.sample_data(self.new_data_size)
+
+    # 入れ替え用集団生成
+    new_population = Population(len(sampled_array), self.individual_size)
+    new_population.set_array(sampled_array)
+
+    # 入れ替える
+    self.population.array[len(self.population.array) - self.new_data_size:len(self.population.array)] = new_population.array
+    self.evaluate()
+    
 
   def get_sorted_population(self):
     sorted_population = deepcopy(self.population)
@@ -47,4 +53,5 @@ if __name__ == '__main__':
   NEW_DATA_SIZE = 5
 
   boa = Boa(POPULATION_SIZE, N, SELECT_SIZE, NEW_DATA_SIZE)
+  boa.evaluate()
   boa.do_one_generation()

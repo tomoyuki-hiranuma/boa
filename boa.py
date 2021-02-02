@@ -4,26 +4,36 @@ from utils.functions import Onemax
 from copy import deepcopy
 
 class Boa:
-  def __init__(self, population_size, individual_size, select_size, change_size):
+  def __init__(self, population_size, individual_size, select_size, new_data_size):
     self.population_size = population_size # populationから取得可能→いらない
     self.individual_size = individual_size # populationから取得可能→いらない
     self.select_size = select_size
-    self.change_size = change_size
+    self.new_data_size = new_data_size
     self.population = Population(population_size, individual_size)
-    self.bayesianNetwork = BayesianNetwork(self.population.array)
+    self.bayesianNetwork = None # BayesianNetwork(self.population.array)
     self.selected_population = None # いらなくなるかも
     self.function = Onemax()
 
   def do_one_generation(self):
     self.evaluate()
     self.population = self.get_sorted_population()
+    selected_array = deepcopy(self.population.array[0:self.select_size])
+    # ネットワーク生成、推定
+    self.create_network(selected_array)
+    self.bayesianNetwork.fit()
+    cpds = self.bayesianNetwork.model.get_cpds()
+
+    # サンプル取得
+    sampled_data = self.bayesianNetwork.sample_data(self.new_data_size)
+    print(sampled_data)
 
   def get_sorted_population(self):
     sorted_population = deepcopy(self.population)
     sorted_population.array = sorted(sorted_population.array, key=lambda x: x.fitness)[::-1]
     return sorted_population
 
-  # def select_population(self):
+  def create_network(self, selected_array):
+    self.bayesianNetwork = BayesianNetwork(selected_array)
 
   def evaluate(self):
     for individual in self.population.array:
@@ -31,11 +41,10 @@ class Boa:
 
 
 if __name__ == '__main__':
-  POPULATION_SIZE = 4
+  POPULATION_SIZE = 15
   N = 6
   SELECT_SIZE = 3
-  CHANGE_SIZE = 5
+  NEW_DATA_SIZE = 5
 
-  boa = Boa(POPULATION_SIZE, N, SELECT_SIZE, CHANGE_SIZE)
+  boa = Boa(POPULATION_SIZE, N, SELECT_SIZE, NEW_DATA_SIZE)
   boa.do_one_generation()
-  boa.population.print_population()

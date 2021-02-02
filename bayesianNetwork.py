@@ -17,6 +17,7 @@ class BayesianNetwork:
     self.network = estimated_network.estimate()
 
   def fit(self):
+    self.estimate()
     self.model = BayesianModel(list(self.network.edges()))
     self.model.add_nodes_from(list(self.network.nodes()))
     self.model.fit(self.data)
@@ -33,16 +34,16 @@ class BayesianNetwork:
     return data.loc[:, list_col_sorted]
 
   def _to_numpy_array(self, individual_array):
+    # リファクタリング余地あり
     array = []
     for individual in individual_array:
-      # print(individual.gene)
-      array.append(individual.gene)
+      array.append(list(individual.gene))
     return np.array(array)
 
   def _to_DataFrame(self, data):
     data = self._to_numpy_array(data)
     pd_data = pd.DataFrame()
-    for index in range(len(data)-1):
+    for index in range(len(data[0])):
       column_name = "X" + str(index+1)
       pd_data[column_name] = data.T[index]
     return pd_data
@@ -54,7 +55,7 @@ if __name__ == '__main__':
   # print(pop1)
   BN = BayesianNetwork(pop1.array)
   # print(BN.data)
-  BN.estimate()
+  # BN.estimate()
   BN.fit()
   cpds = BN.model.get_cpds()
   for cpd in cpds:

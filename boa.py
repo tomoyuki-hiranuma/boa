@@ -1,6 +1,6 @@
-from population import Population
-from bayesianNetwork import BayesianNetwork
-from utils.functions import Onemax
+from src.population import Population
+from src.bayesianNetwork import BayesianNetwork
+from src.utils.functions import Onemax, ThreeDeceptive
 from copy import deepcopy
 
 class Boa:
@@ -51,7 +51,7 @@ if __name__ == '__main__':
   N = 6
   SELECT_SIZE = 10
   NEW_DATA_SIZE = 5
-  GENERATIONS = 10
+  GENERATIONS = 1
 
   boa = Boa(POPULATION_SIZE, N, SELECT_SIZE, NEW_DATA_SIZE)
   boa.evaluate()

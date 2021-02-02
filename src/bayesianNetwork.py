@@ -4,7 +4,7 @@ from pgmpy.models import BayesianModel
 from copy import deepcopy
 from pgmpy.estimators import K2Score, BicScore, HillClimbSearch, ExhaustiveSearch
 from pgmpy.sampling import BayesianModelSampling
-from population import Population
+from src.population import Population
 
 class BayesianNetwork:
   def __init__(self, individual_array):
@@ -13,7 +13,7 @@ class BayesianNetwork:
     self.data = self._to_DataFrame(individual_array)
 
   def estimate(self):
-    estimated_network = HillClimbSearch(self.data, scoring_method=BicScore(self.data))
+    estimated_network = HillClimbSearch(self.data, scoring_method=K2Score(self.data))
     self.network = estimated_network.estimate()
 
   def fit(self):

@@ -1,5 +1,5 @@
 import numpy as np
-from individual import Individual
+from src.individual import Individual
 
 class Population:
   def __init__(self, population_size, individual_size):

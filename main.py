@@ -15,6 +15,9 @@ def select(population, _size):
   sorted_array = sorted_array[::-1]
   return sorted_array[0:_size]
 
+def calc_evaluation(self):
+  self.population.calc_evaluation(fucntion)
+
 def sort_pop(population):
   eval_pop = np.array([sum(x) for x in population])
   sorted_indexes = np.argsort(eval_pop)

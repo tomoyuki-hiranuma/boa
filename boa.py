@@ -47,11 +47,15 @@ class Boa:
 
 
 if __name__ == '__main__':
-  POPULATION_SIZE = 15
+  POPULATION_SIZE = 30
   N = 6
-  SELECT_SIZE = 3
+  SELECT_SIZE = 10
   NEW_DATA_SIZE = 5
+  GENERATIONS = 10
 
   boa = Boa(POPULATION_SIZE, N, SELECT_SIZE, NEW_DATA_SIZE)
   boa.evaluate()
-  boa.do_one_generation()
+  for i in range(GENERATIONS):
+    boa.do_one_generation()
+
+  boa.population.print_population()

@@ -9,3 +9,7 @@ Bayesian Optimization Algorithm(BOA)の実装
 4: BNから集団O(t)生成  
 5: P(t)の評価値の低い個体群をO(t)と交換することでP(t+1)を生成  
 6: 終了条件満たしていなければ2へ  
+
+### ベイジアンネットワークの探索方法
+- Scoring metric : BicScore  
+- Searching method : HillClimbMethod  

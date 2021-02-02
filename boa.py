@@ -45,17 +45,37 @@ class Boa:
     for individual in self.population.array:
       individual.fitness = self.function.calc_evaluation(individual)
 
+  def get_mean_eval(self):
+    eval = 0.0
+    for individual in self.population.array:
+      eval += individual.fitness
+    return eval/len(self.population.array)
+
 
 if __name__ == '__main__':
-  POPULATION_SIZE = 30
-  N = 7
-  SELECT_SIZE = 10
-  NEW_DATA_SIZE = 5
+  POPULATION_SIZE = 1000
+  N = 30
+  SELECT_SIZE = POPULATION_SIZE//2
+  NEW_DATA_SIZE = POPULATION_SIZE//2
   GENERATIONS = 30
+  MAX_EVAL_NUM = 100000
+  MAX_EVAL = N//3
 
   boa = Boa(POPULATION_SIZE, N, SELECT_SIZE, NEW_DATA_SIZE)
   boa.evaluate()
-  for i in range(GENERATIONS):
+  generation = 0
+  eval_num = 0
+  mean_eval = 0.0
+  generations = []
+  mean_evals = []
+  while eval_num < MAX_EVAL_NUM and mean_eval < MAX_EVAL:
     boa.do_one_generation()
+    generation += 1
+    eval_num += NEW_DATA_SIZE
+    mean_eval = boa.get_mean_eval()
+    print(mean_eval)
+    mean_evals.append(mean_eval)
+    generations.append(generation)
 
   boa.population.print_population()
+  print(mean_eval)

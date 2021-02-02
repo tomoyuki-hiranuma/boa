@@ -9,7 +9,7 @@ class BayesianNetwork:
   def __init__(self, data):
     self.network = None
     self.model = None
-    self.data = self.to_DataFrame(data)
+    self.data = self._to_DataFrame(data)
 
   def estimate(self):
     estimated_network = HillClimbSearch(self.data, scoring_method=BicScore(self.data))
@@ -31,7 +31,7 @@ class BayesianNetwork:
     list_col_sorted.sort()
     return data.loc[:, list_col_sorted]
 
-  def to_DataFrame(self, data):
+  def _to_DataFrame(self, data):
     pd_data = pd.DataFrame()
     for index in range(len(data[0])):
       column_name = "X" + str(index+1)

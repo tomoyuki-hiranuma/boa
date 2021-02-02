@@ -8,7 +8,7 @@ class Population:
   
   def print_population(self):
     for individual in self.array:
-      print(individual.gene)
+      individual.print_info()
 
 
 if __name__ == '__main__':

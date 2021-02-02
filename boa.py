@@ -12,7 +12,7 @@ class Boa:
     self.population = Population(population_size, individual_size)
     self.bayesianNetwork = None # BayesianNetwork(self.population.array)
     self.selected_population = None # いらなくなるかも
-    self.function = Onemax()
+    self.function = ThreeDeceptive()
 
   def do_one_generation(self):
     self.population = self.get_sorted_population()
@@ -48,10 +48,10 @@ class Boa:
 
 if __name__ == '__main__':
   POPULATION_SIZE = 30
-  N = 6
+  N = 7
   SELECT_SIZE = 10
   NEW_DATA_SIZE = 5
-  GENERATIONS = 1
+  GENERATIONS = 30
 
   boa = Boa(POPULATION_SIZE, N, SELECT_SIZE, NEW_DATA_SIZE)
   boa.evaluate()

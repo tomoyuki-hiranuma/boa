@@ -1,0 +1,1 @@
+from src.utils.functions import Onemax, ThreeDeceptive

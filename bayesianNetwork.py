@@ -4,18 +4,20 @@ from pgmpy.models import BayesianModel
 from copy import deepcopy
 from pgmpy.estimators import K2Score, BicScore, HillClimbSearch, ExhaustiveSearch
 from pgmpy.sampling import BayesianModelSampling
+from population import Population
 
 class BayesianNetwork:
-  def __init__(self, data):
+  def __init__(self, individual_array):
     self.network = None
     self.model = None
-    self.data = self.to_DataFrame(data)
+    self.data = self._to_DataFrame(individual_array)
 
   def estimate(self):
     estimated_network = HillClimbSearch(self.data, scoring_method=BicScore(self.data))
     self.network = estimated_network.estimate()
 
   def fit(self):
+    self.estimate()
     self.model = BayesianModel(list(self.network.edges()))
     self.model.add_nodes_from(list(self.network.nodes()))
     self.model.fit(self.data)
@@ -31,7 +33,15 @@ class BayesianNetwork:
     list_col_sorted.sort()
     return data.loc[:, list_col_sorted]
 
-  def to_DataFrame(self, data):
+  def _to_numpy_array(self, individual_array):
+    # リファクタリング余地あり
+    array = []
+    for individual in individual_array:
+      array.append(list(individual.gene))
+    return np.array(array)
+
+  def _to_DataFrame(self, data):
+    data = self._to_numpy_array(data)
     pd_data = pd.DataFrame()
     for index in range(len(data[0])):
       column_name = "X" + str(index+1)
@@ -40,12 +50,12 @@ class BayesianNetwork:
 
 if __name__ == '__main__':
   N = 4
-  POP_SIZE = 40
-  pop1 = np.random.randint(2, size=(POP_SIZE, N))
+  POP_SIZE = 5
+  pop1 = Population(POP_SIZE, N)
   # print(pop1)
-  BN = BayesianNetwork(pop1)
+  BN = BayesianNetwork(pop1.array)
   # print(BN.data)
-  BN.estimate()
+  # BN.estimate()
   BN.fit()
   cpds = BN.model.get_cpds()
   for cpd in cpds:

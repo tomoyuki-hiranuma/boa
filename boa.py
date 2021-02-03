@@ -60,11 +60,20 @@ class Boa:
     self.population.output_to_csv(file_name, generation)
 
 if __name__ == '__main__':
+  '''
+    パラメータ設定
+    POPULATION_SIZE: 集団サイズ(論文ではN)
+    N: 遺伝子長(論文ではn)
+    TAU: 切り捨て選択の割合
+    SELECT_SIZE: BN構築用に使われる個体群サイズ
+    NEW_DATA_SIZE: BNから生成される個体群サイズ
+  '''
   POPULATION_SIZE = 1000
   N = 30
-  SELECT_SIZE = POPULATION_SIZE//2
-  NEW_DATA_SIZE = POPULATION_SIZE//2
-  GENERATIONS = 30
+  TAU = 0.5
+  SELECT_SIZE = int(POPULATION_SIZE * (1.0 - TAU))
+  NEW_DATA_SIZE = int(POPULATION_SIZE * TAU)
+  MAX_GENERATIONS = 30
   MAX_EVAL_NUM = 100000
   MAX_EVAL = N//3
   FILE_NAME = "data/BOA_POP={}_N={}_3_deceptive.csv".format(POPULATION_SIZE, N)
@@ -74,7 +83,8 @@ if __name__ == '__main__':
   generation = 0
   eval_num = 0
   mean_eval = 0.0
-  while eval_num < MAX_EVAL_NUM and mean_eval < MAX_EVAL:
+
+  while eval_num < MAX_EVAL_NUM and mean_eval < MAX_EVAL * 0.95:
     boa.do_one_generation()
     generation += 1
     eval_num += NEW_DATA_SIZE

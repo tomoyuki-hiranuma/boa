@@ -1,5 +1,6 @@
 import numpy as np
 from src.individual import Individual
+import csv
 
 class Population:
   def __init__(self, population_size, individual_size):
@@ -15,6 +16,11 @@ class Population:
     for individual in self.array:
       individual.print_info()
 
+  def output_to_csv(self, file_name, gen):
+    with open(file_name, 'a') as f:
+      writer = csv.writer(f)
+      for individual in self.array:
+        writer.writerow([gen] + individual.get_row())
 
 if __name__ == '__main__':
   N = 6

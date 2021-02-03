@@ -73,10 +73,11 @@ if __name__ == '__main__':
   TAU = 0.5
   SELECT_SIZE = int(POPULATION_SIZE * (1.0 - TAU))
   NEW_DATA_SIZE = int(POPULATION_SIZE * TAU)
-  MAX_GENERATIONS = 30
+  MAX_EXPERIMENT = 30
   MAX_EVAL_NUM = 100000
   MAX_EVAL = N//3
-  FILE_NAME = "data/BOA_POP={}_N={}_3_deceptive.csv".format(POPULATION_SIZE, N)
+
+  FILE_NAME = "data/BOA_POP={}_N={}_3_deceptive_{}.csv".format(POPULATION_SIZE, N)
 
   boa = Boa(POPULATION_SIZE, N, SELECT_SIZE, NEW_DATA_SIZE)
   boa.evaluate()

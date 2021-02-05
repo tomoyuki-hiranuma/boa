@@ -53,10 +53,6 @@ class Boa:
     return eval/len(self.population.array)
 
   def output_to_csv(self, file_name, generation):
-    header = ['generation', 'individual', 'fitness']
-    with open(file_name, 'a') as f:
-      writer = csv.writer(f)
-      writer.writerow(header)
     self.population.output_to_csv(file_name, generation)
 
 if __name__ == '__main__':
@@ -68,22 +64,27 @@ if __name__ == '__main__':
     SELECT_SIZE: BN構築用に使われる個体群サイズ
     NEW_DATA_SIZE: BNから生成される個体群サイズ
   '''
-  POPULATION_SIZE = 1000
+  POPULATION_SIZE = 800
   N = 30
   TAU = 0.5
   SELECT_SIZE = int(POPULATION_SIZE * (1.0 - TAU))
-  NEW_DATA_SIZE = int(POPULATION_SIZE * TAU)
+  NEW_DATA_SIZE = 5
   MAX_EXPERIMENT = 30
-  MAX_EVAL_NUM = 100000
+  MAX_EVAL_NUM = 2000 * N
   MAX_EVAL = N//3
 
-  FILE_NAME = "data/BOA_POP={}_N={}_3_deceptive_{}.csv".format(POPULATION_SIZE, N)
+  FILE_NAME = "data/BOA_POP={}_N={}_3_deceptive_new={}.csv".format(POPULATION_SIZE, N, NEW_DATA_SIZE)
 
   boa = Boa(POPULATION_SIZE, N, SELECT_SIZE, NEW_DATA_SIZE)
   boa.evaluate()
   generation = 0
   eval_num = 0
   mean_eval = 0.0
+
+  header = ['generation', 'individual', 'fitness']
+  with open(FILE_NAME, 'a') as f:
+    writer = csv.writer(f)
+    writer.writerow(header)
 
   while eval_num < MAX_EVAL_NUM and mean_eval < MAX_EVAL * 0.95:
     boa.do_one_generation()

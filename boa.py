@@ -110,3 +110,7 @@ if __name__ == '__main__':
   boa.population.print_population()
   print("mean eval: {}".format(mean_eval))
   print("best eval: {}".format(best_eval))
+  if not boa.is_convergence():
+    print("収束して失敗")
+  elif best_eval >= MAX_EVAL * 0.98:
+    print("成功")

@@ -31,14 +31,14 @@ class ThreeDeceptive:
         sum = individual.gene[index]
       
       if sum == 0:
-        eval += 0.9
+        eval += 9
       elif sum == 1:
-        eval += 0.8
+        eval += 8
       elif sum == 2:
-        eval += 0.0
+        eval += 0
       else:
-        eval += 1.0
-    return eval
+        eval += 10
+    return eval/10
 
 if __name__ == '__main__':
   N = 7

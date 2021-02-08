@@ -66,11 +66,11 @@ if __name__ == '__main__':
     パラメータ設定
     POPULATION_SIZE: 集団サイズ(論文ではN)
     N: 遺伝子長(論文ではn)
-    TAU: 切り捨て選択の割合
+    TAU: 切り捨て選択の割合 50%
     SELECT_SIZE: BN構築用に使われる個体群サイズ
-    NEW_DATA_SIZE: BNから生成される個体群サイズ
+    NEW_DATA_SIZE: BNから生成される個体群サイズ 下位個体群の半分が入れ変わる
   '''
-  POPULATION_SIZE = 1000
+  POPULATION_SIZE = 1500
   N = 30
   TAU = 0.5
   SELECT_SIZE = int(POPULATION_SIZE * (1.0 - TAU))
@@ -90,7 +90,7 @@ if __name__ == '__main__':
   is_converge = False
 
   header = ['generation', 'individual', 'fitness']
-  with open(FILE_NAME, 'a') as f:
+  with open(FILE_NAME, 'w') as f:
     writer = csv.writer(f)
     writer.writerow(header)
   
@@ -109,7 +109,7 @@ if __name__ == '__main__':
     if generation%5 == 0 or is_converge or best_eval >= MAX_EVAL * 0.98:
       boa.output_to_csv(FILE_NAME, generation)
 
-  boa.population.print_population()
+  boa.population.print_head_population()
   print("mean eval: {}".format(mean_eval))
   print("best eval: {}".format(best_eval))
   if is_converge:

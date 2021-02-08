@@ -15,11 +15,14 @@ class Population:
   def is_convergence(self):
     array = np.array([individual.gene for individual in self.array])
     means = array.mean(axis=0)
-    print(means)
-    return (means < 0.05).all() or (means > 0.95).all()
+    return (means < 0.03).all() or (means > 0.97).all()
   
   def print_population(self):
     for individual in self.array:
+      individual.print_info()
+
+  def print_head_population(self, number=5):
+    for individual in self.array[0:number]:
       individual.print_info()
 
   def output_to_csv(self, file_name, gen):

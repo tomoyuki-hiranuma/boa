@@ -32,12 +32,15 @@ class Boa:
     # 入れ替える
     self.population.array[len(self.population.array) - self.new_data_size:len(self.population.array)] = new_population.array
     self.evaluate()
-    self.population = self.get_sorted_population()
+    self.sort_population()
 
   def get_sorted_population(self):
     sorted_population = deepcopy(self.population)
     sorted_population.array = sorted(sorted_population.array, key=lambda x: x.fitness)[::-1]
     return sorted_population
+
+  def sort_population(self):
+    self.population = self.get_sorted_population()
 
   def create_network(self, selected_array):
     self.bayesianNetwork = BayesianNetwork(selected_array)
@@ -83,11 +86,14 @@ if __name__ == '__main__':
 
   boa = Boa(POPULATION_SIZE, N, SELECT_SIZE, NEW_DATA_SIZE)
   boa.evaluate()
+  boa.sort_population()
+  
   generation = 0
   eval_num = 0
   mean_eval = 0.0
   best_eval = 0.0
   is_converge = False
+  optimal_rate = 1.0
 
   header = ['generation', 'individual', 'fitness']
   with open(FILE_NAME, 'w') as f:
@@ -96,7 +102,7 @@ if __name__ == '__main__':
   
   boa.output_to_csv(FILE_NAME, generation)
 
-  while eval_num < MAX_EVAL_NUM and best_eval < MAX_EVAL * 0.98 and not is_converge:
+  while eval_num < MAX_EVAL_NUM and best_eval < MAX_EVAL * optimal_rate and not is_converge:
     print("第{}世代".format(generation + 1))
     boa.do_one_generation()
     generation += 1
@@ -106,7 +112,7 @@ if __name__ == '__main__':
     print("mean eval: {}".format(mean_eval))
     print("best eval: {}".format(best_eval))
     is_converge = boa.is_convergence()
-    if generation%5 == 0 or is_converge or best_eval >= MAX_EVAL * 0.98:
+    if generation%5 == 0 or is_converge or best_eval >= MAX_EVAL * optimal_rate:
       boa.output_to_csv(FILE_NAME, generation)
 
   boa.population.print_head_population()
@@ -114,5 +120,5 @@ if __name__ == '__main__':
   print("best eval: {}".format(best_eval))
   if is_converge:
     print("収束して失敗")
-  elif best_eval >= MAX_EVAL * 0.98:
+  elif best_eval >= MAX_EVAL * optimal_rate:
     print("成功")

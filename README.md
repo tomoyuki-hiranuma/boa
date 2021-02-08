@@ -13,3 +13,4 @@ Bayesian Optimization Algorithm(BOA)の実装
 ### ベイジアンネットワークの探索方法
 - Scoring metric : BicScore  
 - Searching method : HillClimbMethod  
+- 探索したモデルのCPDは最尤推定で求める  

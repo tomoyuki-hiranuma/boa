@@ -32,7 +32,7 @@ class Boa:
     # 入れ替える
     self.population.array[len(self.population.array) - self.new_data_size:len(self.population.array)] = new_population.array
     self.evaluate()
-    
+    self.population = self.get_sorted_population()
 
   def get_sorted_population(self):
     sorted_population = deepcopy(self.population)
@@ -51,9 +51,15 @@ class Boa:
     for individual in self.population.array:
       eval += individual.fitness
     return eval/len(self.population.array)
+  
+  def get_best_eval(self):
+    return self.population.array[0].fitness
 
   def output_to_csv(self, file_name, generation):
     self.population.output_to_csv(file_name, generation)
+
+  def is_convergence(self):
+    return self.population.is_convergence()
 
 if __name__ == '__main__':
   '''
@@ -64,11 +70,11 @@ if __name__ == '__main__':
     SELECT_SIZE: BN構築用に使われる個体群サイズ
     NEW_DATA_SIZE: BNから生成される個体群サイズ
   '''
-  POPULATION_SIZE = 800
+  POPULATION_SIZE = 1000
   N = 30
   TAU = 0.5
   SELECT_SIZE = int(POPULATION_SIZE * (1.0 - TAU))
-  NEW_DATA_SIZE = 5
+  NEW_DATA_SIZE = int(POPULATION_SIZE * TAU)
   MAX_EXPERIMENT = 30
   MAX_EVAL_NUM = 2000 * N
   MAX_EVAL = N//3
@@ -80,19 +86,27 @@ if __name__ == '__main__':
   generation = 0
   eval_num = 0
   mean_eval = 0.0
+  best_eval = 0.0
 
   header = ['generation', 'individual', 'fitness']
   with open(FILE_NAME, 'a') as f:
     writer = csv.writer(f)
     writer.writerow(header)
+  
+  boa.output_to_csv(FILE_NAME, generation)
 
-  while eval_num < MAX_EVAL_NUM and mean_eval < MAX_EVAL * 0.95:
+  while eval_num < MAX_EVAL_NUM and best_eval < MAX_EVAL * 0.98 and boa.is_convergence():
+    print("第{}世代".format(generation + 1))
     boa.do_one_generation()
     generation += 1
     eval_num += NEW_DATA_SIZE
     mean_eval = boa.get_mean_eval()
-    print(mean_eval)
-    boa.output_to_csv(FILE_NAME, generation)
+    best_eval = boa.get_best_eval()
+    print("mean eval: {}".format(mean_eval))
+    print("best eval: {}".format(best_eval))
+    if generation%5 == 0 or not boa.is_convergence() or best_eval >= MAX_EVAL * 0.98:
+      boa.output_to_csv(FILE_NAME, generation)
 
   boa.population.print_population()
-  print(mean_eval)
+  print("mean eval: {}".format(mean_eval))
+  print("best eval: {}".format(best_eval))

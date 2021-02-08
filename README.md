@@ -11,6 +11,9 @@ Bayesian Optimization Algorithm(BOA)の実装
 6: 終了条件満たしていなければ2へ  
 
 ### ベイジアンネットワークの探索方法
-- Scoring metric : BicScore  
+- Scoring metric : K2Score, k=2  
 - Searching method : HillClimbMethod  
 - 探索したモデルのCPDは最尤推定で求める  
+### 個体の更新方法  
+- 選択個体:集団サイズの50%  
+- 更新個体:集団サイズの50%

@@ -73,7 +73,7 @@ if __name__ == '__main__':
     SELECT_SIZE: BN構築用に使われる個体群サイズ
     NEW_DATA_SIZE: BNから生成される個体群サイズ 下位個体群の半分が入れ変わる
   '''
-  POPULATION_SIZE = 600
+  POPULATION_SIZE = 500
   N = 30
   TAU = 0.5
   SELECT_SIZE = int(POPULATION_SIZE * (1.0 - TAU))
@@ -82,7 +82,7 @@ if __name__ == '__main__':
   MAX_EVAL_NUM = 2000 * N
   MAX_EVAL = N//3
 
-  FILE_NAME = "data/BOA_POP={}_N={}_3_deceptive_new={}.csv".format(POPULATION_SIZE, N, NEW_DATA_SIZE)
+  FILE_NAME = "data/N={}/BOA_POP={}_N={}_3_deceptive_new={}.csv".format(N, POPULATION_SIZE, N, NEW_DATA_SIZE)
 
   boa = Boa(POPULATION_SIZE, N, SELECT_SIZE, NEW_DATA_SIZE)
   boa.evaluate()

@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 from pgmpy.models import BayesianModel
 from copy import deepcopy
-from pgmpy.estimators import K2Score, BicScore, HillClimbSearch, ExhaustiveSearch, MaximumLikelihoodEstimator
+from pgmpy.estimators import K2Score, BicScore, HillClimbSearch, ExhaustiveSearch
 from pgmpy.sampling import BayesianModelSampling
 from src.population import Population
 
@@ -17,16 +17,11 @@ class BayesianNetwork:
     estimated_network = HillClimbSearch(self.data, scoring_method=K2Score(self.data))
     self.network = estimated_network.estimate()
 
-  def calc_MLE_cpds(self):
-    estimator = MaximumLikelihoodEstimator(self.model, self.data)
-    for cpd in estimator.get_parameters():
-      self.model.add_cpds(cpd)
-
   def fit(self):
     self.estimate()
     self.model = BayesianModel(list(self.network.edges()))
     self.model.add_nodes_from(list(self.network.nodes()))
-    self.calc_MLE_cpds()    
+    self.model.fit(self.data)   
 
   def sample_data(self, new_data_size):
     inference = BayesianModelSampling(self.model)

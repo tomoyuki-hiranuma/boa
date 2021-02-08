@@ -17,7 +17,7 @@ class BayesianNetwork:
     estimated_network = HillClimbSearch(self.data, scoring_method=K2Score(self.data))
     self.network = estimated_network.estimate()
 
-  def MLE_cpds(self):
+  def calc_MLE_cpds(self):
     estimator = MaximumLikelihoodEstimator(self.model, self.data)
     for cpd in estimator.get_parameters():
       self.model.add_cpds(cpd)
@@ -26,7 +26,7 @@ class BayesianNetwork:
     self.estimate()
     self.model = BayesianModel(list(self.network.edges()))
     self.model.add_nodes_from(list(self.network.nodes()))
-    self.MLE_cpds()    
+    self.calc_MLE_cpds()    
 
   def sample_data(self, new_data_size):
     inference = BayesianModelSampling(self.model)

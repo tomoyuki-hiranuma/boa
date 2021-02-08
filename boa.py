@@ -67,11 +67,11 @@ if __name__ == '__main__':
     SELECT_SIZE: BN構築用に使われる個体群サイズ
     NEW_DATA_SIZE: BNから生成される個体群サイズ
   '''
-  POPULATION_SIZE = 800
+  POPULATION_SIZE = 1000
   N = 30
   TAU = 0.5
   SELECT_SIZE = int(POPULATION_SIZE * (1.0 - TAU))
-  NEW_DATA_SIZE = 200
+  NEW_DATA_SIZE = 10
   MAX_EXPERIMENT = 30
   MAX_EVAL_NUM = 2000 * N
   MAX_EVAL = N//3

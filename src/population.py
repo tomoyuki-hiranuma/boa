@@ -11,6 +11,11 @@ class Population:
     self.array = np.array([Individual(self.individual_size) for gene in array])
     for index, individual in enumerate(self.array):
       individual.set_gene(array[index])
+
+  def is_convergence(self):
+    array = np.array([individual.gene for individual in self.array])
+    means = array.mean(axis=0)
+    return (0.05 <= means).all() and (means <= 0.95).all()
   
   def print_population(self):
     for individual in self.array:

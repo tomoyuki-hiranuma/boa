@@ -58,6 +58,9 @@ class Boa:
   def output_to_csv(self, file_name, generation):
     self.population.output_to_csv(file_name, generation)
 
+  def is_convergence(self):
+    return self.population.is_convergence()
+
 if __name__ == '__main__':
   '''
     パラメータ設定
@@ -71,12 +74,12 @@ if __name__ == '__main__':
   N = 30
   TAU = 0.5
   SELECT_SIZE = int(POPULATION_SIZE * (1.0 - TAU))
-  NEW_DATA_SIZE = 10
+  NEW_DATA_SIZE = int(POPULATION_SIZE * TAU)
   MAX_EXPERIMENT = 30
   MAX_EVAL_NUM = 2000 * N
   MAX_EVAL = N//3
 
-  FILE_NAME = "data/BOA_POP={}_N={}_3_deceptive_new={}_test.csv".format(POPULATION_SIZE, N, NEW_DATA_SIZE)
+  FILE_NAME = "data/BOA_POP={}_N={}_3_deceptive_new={}.csv".format(POPULATION_SIZE, N, NEW_DATA_SIZE)
 
   boa = Boa(POPULATION_SIZE, N, SELECT_SIZE, NEW_DATA_SIZE)
   boa.evaluate()
@@ -92,7 +95,7 @@ if __name__ == '__main__':
   
   boa.output_to_csv(FILE_NAME, generation)
 
-  while eval_num < MAX_EVAL_NUM and best_eval < MAX_EVAL * 0.95:
+  while eval_num < MAX_EVAL_NUM and best_eval < MAX_EVAL * 0.98 and boa.is_convergence():
     print("第{}世代".format(generation + 1))
     boa.do_one_generation()
     generation += 1
@@ -101,8 +104,9 @@ if __name__ == '__main__':
     best_eval = boa.get_best_eval()
     print("mean eval: {}".format(mean_eval))
     print("best eval: {}".format(best_eval))
-    if generation%5 == 0:
+    if generation%5 == 0 or not boa.is_convergence() or best_eval >= MAX_EVAL * 0.98:
       boa.output_to_csv(FILE_NAME, generation)
 
   boa.population.print_population()
-  print(mean_eval)
+  print("mean eval: {}".format(mean_eval))
+  print("best eval: {}".format(best_eval))

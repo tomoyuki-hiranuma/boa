@@ -122,3 +122,6 @@ if __name__ == '__main__':
     print("収束して失敗")
   elif best_eval >= MAX_EVAL * optimal_rate:
     print("成功")
+    print(boa.bayesianNetwork.network.edges())
+  else:
+    print("評価回数の限界値のため失敗")

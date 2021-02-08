@@ -87,6 +87,7 @@ if __name__ == '__main__':
   eval_num = 0
   mean_eval = 0.0
   best_eval = 0.0
+  is_converge = False
 
   header = ['generation', 'individual', 'fitness']
   with open(FILE_NAME, 'a') as f:
@@ -95,7 +96,7 @@ if __name__ == '__main__':
   
   boa.output_to_csv(FILE_NAME, generation)
 
-  while eval_num < MAX_EVAL_NUM and best_eval < MAX_EVAL * 0.98 and boa.is_convergence():
+  while eval_num < MAX_EVAL_NUM and best_eval < MAX_EVAL * 0.98 and not is_converge:
     print("第{}世代".format(generation + 1))
     boa.do_one_generation()
     generation += 1
@@ -104,13 +105,14 @@ if __name__ == '__main__':
     best_eval = boa.get_best_eval()
     print("mean eval: {}".format(mean_eval))
     print("best eval: {}".format(best_eval))
-    if generation%5 == 0 or not boa.is_convergence() or best_eval >= MAX_EVAL * 0.98:
+    is_converge = boa.is_convergence()
+    if generation%5 == 0 or is_converge or best_eval >= MAX_EVAL * 0.98:
       boa.output_to_csv(FILE_NAME, generation)
 
   boa.population.print_population()
   print("mean eval: {}".format(mean_eval))
   print("best eval: {}".format(best_eval))
-  if not boa.is_convergence():
+  if is_converge:
     print("収束して失敗")
   elif best_eval >= MAX_EVAL * 0.98:
     print("成功")

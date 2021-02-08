@@ -15,7 +15,8 @@ class Population:
   def is_convergence(self):
     array = np.array([individual.gene for individual in self.array])
     means = array.mean(axis=0)
-    return (0.05 <= means).all() and (means <= 0.95).all()
+    print(means)
+    return (means < 0.05).all() or (means > 0.95).all()
   
   def print_population(self):
     for individual in self.array:

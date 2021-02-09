@@ -85,11 +85,21 @@ if __name__ == '__main__':
     NEW_DATA_SIZE = int(POPULATION_SIZE * TAU)
     MAX_EXPERIMENT = 30
     MAX_EVAL_NUM = 2000 * N
-    MAX_EVAL = N//3
+    
+    FILE_NAME = "data/NK_model/N={}_K={}/BOA_POP={}_N={}_NKModel_K={}_new={}.csv".format(N, K, POPULATION_SIZE, N, K, NEW_DATA_SIZE)
+    dir_name = FILE_NAME.split("/BOA")[0]
 
-    FILE_NAME = "data/N={}_K={}/BOA_POP={}_N={}_NKModel_K={}_new={}.csv".format(N, K, POPULATION_SIZE, N, K, NEW_DATA_SIZE)
-    dir_name = FILE_NAME.split("BOA")[0]
+    
     boa = Boa(POPULATION_SIZE, N, SELECT_SIZE, NEW_DATA_SIZE, K)
+
+    '''
+      3-deceptiveのとき
+        OPT_EVAL = N//3
+      NK-Modelのとき
+        OPT_EVAL = boa.function.get_best_eval
+    '''
+    OPT_EVAL = boa.function.get_best_eval
+
     boa.evaluate()
     boa.sort_population()
     
@@ -100,7 +110,7 @@ if __name__ == '__main__':
     is_converge = False
     optimal_rate = 1.0
 
-    os.makedirs(FILE_NAME[0:10], exist_ok=True)
+    os.makedirs(dir_name, exist_ok=True)
     header = ['generation', 'individual', 'fitness']
     with open(FILE_NAME, 'w') as f:
       writer = csv.writer(f)
@@ -108,7 +118,7 @@ if __name__ == '__main__':
     
     boa.output_to_csv(FILE_NAME, generation)
 
-    while eval_num < MAX_EVAL_NUM and best_eval < MAX_EVAL * optimal_rate and not is_converge:
+    while eval_num < MAX_EVAL_NUM and best_eval < OPT_EVAL * optimal_rate and not is_converge:
       print("第{}世代".format(generation + 1))
       boa.do_one_generation()
       generation += 1
@@ -118,7 +128,7 @@ if __name__ == '__main__':
       print("mean eval: {}".format(mean_eval))
       print("best eval: {}".format(best_eval))
       is_converge = boa.is_convergence()
-      if generation%5 == 0 or is_converge or best_eval >= MAX_EVAL * optimal_rate:
+      if generation%5 == 0 or is_converge or best_eval >= OPT_EVAL * optimal_rate:
         boa.output_to_csv(FILE_NAME, generation)
 
     boa.population.print_head_population()
@@ -126,7 +136,7 @@ if __name__ == '__main__':
     print("best eval: {}".format(best_eval))
     if is_converge:
       print("収束して失敗")
-    elif best_eval >= MAX_EVAL * optimal_rate:
+    elif best_eval >= OPT_EVAL * optimal_rate:
       print("成功")
       print(boa.bayesianNetwork.network.edges())
     else:

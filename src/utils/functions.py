@@ -7,6 +7,7 @@
   遺伝子を受け取り評価値を返す関数calc_evaluation()を主に用いる
 '''
 import numpy as np
+from copy import deepcopy
 from src.individual import Individual
 
 class Onemax:
@@ -46,7 +47,8 @@ class NKModel:
     self.N = N
     self.K = K
     self.nk_landscape = self._create_NK_landscape()
-    self.individual = None
+    self.individual = Individual(N)
+    self.calc_optimization()
 
   def _create_NK_landscape(self):
     np.random.seed(1)
@@ -57,11 +59,13 @@ class NKModel:
 	# 適応度を計算する
   def calc_evaluation(self, individual):
     fitness = 0.0
-    print(individual.gene)
-    long_genes = individual.gene + individual.gene
+    long_genes = np.hstack((individual.gene, individual.gene))
     for i in range(len(individual.gene)):
-      fitness += self.nk_landscape[long_genes[i:i+self.K+1]]
-    fitness /= len(gene)
+      elements = ""
+      for j in long_genes[i:i+self.K+1]:
+        elements += str(j)
+      fitness += self.nk_landscape[elements]
+    fitness /= len(individual.gene)
     return fitness
 
 	# 最適解計算
@@ -72,7 +76,7 @@ class NKModel:
     all_genes = self._to_np_int(all_genes)
     for gene in all_genes:
       individual = Individual(self.N)
-      individual.gene = np.array(gene)
+      individual.gene = deepcopy(gene)
       fitness = self.calc_evaluation(individual)
       if best_eval <= fitness:
         best_eval = fitness
@@ -92,14 +96,14 @@ class NKModel:
 
   @property
   def get_best_eval(self):
-    return self.best_eval
+    return self.individual.fitness
 
   @property
   def get_best_gene(self):
-    return self.best_gene
+    return self.individual.gene
 
   def get_optimized_solution(self):
-    return self.best_gene, self.best_eval
+    return self.individual
 
 
 if __name__ == '__main__':

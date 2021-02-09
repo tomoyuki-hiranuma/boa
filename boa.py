@@ -1,3 +1,4 @@
+import os
 from src.population import Population
 from src.bayesianNetwork import BayesianNetwork
 from src.utils.functions import Onemax, ThreeDeceptive
@@ -73,55 +74,57 @@ if __name__ == '__main__':
     SELECT_SIZE: BN構築用に使われる個体群サイズ
     NEW_DATA_SIZE: BNから生成される個体群サイズ 下位個体群の半分が入れ変わる
   '''
-  POPULATION_SIZE = 500
-  N = 30
-  TAU = 0.5
-  SELECT_SIZE = int(POPULATION_SIZE * (1.0 - TAU))
-  NEW_DATA_SIZE = int(POPULATION_SIZE * TAU)
-  MAX_EXPERIMENT = 30
-  MAX_EVAL_NUM = 2000 * N
-  MAX_EVAL = N//3
+  POPULATION_SIZEs = [500, 600, 700, 800, 900]
+  for POPULATION_SIZE in POPULATION_SIZEs:
+    N = 30
+    TAU = 0.5
+    SELECT_SIZE = int(POPULATION_SIZE * (1.0 - TAU))
+    NEW_DATA_SIZE = int(POPULATION_SIZE * TAU)
+    MAX_EXPERIMENT = 30
+    MAX_EVAL_NUM = 2000 * N
+    MAX_EVAL = N//3
 
-  FILE_NAME = "data/N={}/BOA_POP={}_N={}_3_deceptive_new={}.csv".format(N, POPULATION_SIZE, N, NEW_DATA_SIZE)
+    FILE_NAME = "data/N={}/BOA_POP={}_N={}_3_deceptive_new={}.csv".format(N, POPULATION_SIZE, N, NEW_DATA_SIZE)
 
-  boa = Boa(POPULATION_SIZE, N, SELECT_SIZE, NEW_DATA_SIZE)
-  boa.evaluate()
-  boa.sort_population()
-  
-  generation = 0
-  eval_num = 0
-  mean_eval = 0.0
-  best_eval = 0.0
-  is_converge = False
-  optimal_rate = 1.0
+    boa = Boa(POPULATION_SIZE, N, SELECT_SIZE, NEW_DATA_SIZE)
+    boa.evaluate()
+    boa.sort_population()
+    
+    generation = 0
+    eval_num = 0
+    mean_eval = 0.0
+    best_eval = 0.0
+    is_converge = False
+    optimal_rate = 1.0
 
-  header = ['generation', 'individual', 'fitness']
-  with open(FILE_NAME, 'w') as f:
-    writer = csv.writer(f)
-    writer.writerow(header)
-  
-  boa.output_to_csv(FILE_NAME, generation)
+    os.makedirs(FILE_NAME[0:10], exist_ok=True)
+    header = ['generation', 'individual', 'fitness']
+    with open(FILE_NAME, 'w') as f:
+      writer = csv.writer(f)
+      writer.writerow(header)
+    
+    boa.output_to_csv(FILE_NAME, generation)
 
-  while eval_num < MAX_EVAL_NUM and best_eval < MAX_EVAL * optimal_rate and not is_converge:
-    print("第{}世代".format(generation + 1))
-    boa.do_one_generation()
-    generation += 1
-    eval_num += NEW_DATA_SIZE
-    mean_eval = boa.get_mean_eval()
-    best_eval = boa.get_best_eval()
+    while eval_num < MAX_EVAL_NUM and best_eval < MAX_EVAL * optimal_rate and not is_converge:
+      print("第{}世代".format(generation + 1))
+      boa.do_one_generation()
+      generation += 1
+      eval_num += NEW_DATA_SIZE
+      mean_eval = boa.get_mean_eval()
+      best_eval = boa.get_best_eval()
+      print("mean eval: {}".format(mean_eval))
+      print("best eval: {}".format(best_eval))
+      is_converge = boa.is_convergence()
+      if generation%5 == 0 or is_converge or best_eval >= MAX_EVAL * optimal_rate:
+        boa.output_to_csv(FILE_NAME, generation)
+
+    boa.population.print_head_population()
     print("mean eval: {}".format(mean_eval))
     print("best eval: {}".format(best_eval))
-    is_converge = boa.is_convergence()
-    if generation%5 == 0 or is_converge or best_eval >= MAX_EVAL * optimal_rate:
-      boa.output_to_csv(FILE_NAME, generation)
-
-  boa.population.print_head_population()
-  print("mean eval: {}".format(mean_eval))
-  print("best eval: {}".format(best_eval))
-  if is_converge:
-    print("収束して失敗")
-  elif best_eval >= MAX_EVAL * optimal_rate:
-    print("成功")
-    print(boa.bayesianNetwork.network.edges())
-  else:
-    print("評価回数の限界値のため失敗")
+    if is_converge:
+      print("収束して失敗")
+    elif best_eval >= MAX_EVAL * optimal_rate:
+      print("成功")
+      print(boa.bayesianNetwork.network.edges())
+    else:
+      print("評価回数の限界値のため失敗")

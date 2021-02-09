@@ -14,7 +14,7 @@ class BayesianNetwork:
     self.nodes = None
 
   def estimate(self):
-    estimated_network = HillClimbSearch(self.data, scoring_method=K2Score(self.data))
+    estimated_network = HillClimbSearch(self.data)
     self.network = estimated_network.estimate(max_indegree=2)
 
   def fit(self):

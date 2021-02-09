@@ -40,6 +40,13 @@ class ThreeDeceptive:
         eval += 10
     return eval/10
 
+class NK_Model:
+  def __init__(self, N, K):
+    pass
+
+  def calc_evaluation(self, individual):
+    pass
+
 if __name__ == '__main__':
   N = 7
   ind1 = Individual(N)

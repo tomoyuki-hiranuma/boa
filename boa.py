@@ -99,6 +99,7 @@ if __name__ == '__main__':
         OPT_EVAL = boa.function.get_best_eval
     '''
     OPT_EVAL = boa.function.get_best_eval
+    opt_gene = boa.function.get_best_gene
 
     boa.evaluate()
     boa.sort_population()
@@ -115,7 +116,9 @@ if __name__ == '__main__':
     with open(FILE_NAME, 'w') as f:
       writer = csv.writer(f)
       writer.writerow(header)
-    
+      writer.writerow(["opt", opt_gene, OPT_EVAL])
+      writer.writerow(["START!"])
+
     boa.output_to_csv(FILE_NAME, generation)
 
     while eval_num < MAX_EVAL_NUM and best_eval < OPT_EVAL * optimal_rate and not is_converge:
@@ -134,10 +137,16 @@ if __name__ == '__main__':
     boa.population.print_head_population()
     print("mean eval: {}".format(mean_eval))
     print("best eval: {}".format(best_eval))
-    if is_converge:
-      print("収束して失敗")
-    elif best_eval >= OPT_EVAL * optimal_rate:
-      print("成功")
-      print(boa.bayesianNetwork.network.edges())
-    else:
-      print("評価回数の限界値のため失敗")
+    with open(FILE_NAME, 'a') as f:
+      writer = csv.writer(f)
+      writer.writerow(["EOF"])
+      if is_converge:
+        print("収束して失敗")
+        writer.writerow(["fail"])
+      elif best_eval >= OPT_EVAL * optimal_rate:
+        print("成功")
+        print(boa.bayesianNetwork.network.edges())
+        writer.writerow(["success"])
+      else:
+        print("評価回数の限界値のため失敗")
+        writer.writerow(["fail"])

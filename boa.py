@@ -1,12 +1,12 @@
 import os
 from src.population import Population
 from src.bayesianNetwork import BayesianNetwork
-from src.utils.functions import Onemax, ThreeDeceptive
+from src.utils.functions import Onemax, ThreeDeceptive, NKModel
 from copy import deepcopy
 import csv
 
 class Boa:
-  def __init__(self, population_size, individual_size, select_size, new_data_size):
+  def __init__(self, population_size, individual_size, select_size, new_data_size, K=-1):
     self.population_size = population_size # populationから取得可能→いらない
     self.individual_size = individual_size # populationから取得可能→いらない
     self.select_size = select_size
@@ -14,7 +14,9 @@ class Boa:
     self.population = Population(population_size, individual_size)
     self.bayesianNetwork = None # BayesianNetwork(self.population.array)
     self.selected_population = None # いらなくなるかも
-    self.function = ThreeDeceptive()
+    self.function = NKModel(individual_size, K)
+    if K != -1:
+      self.function.calc_optimization()
 
   def do_one_generation(self):
     self.population = self.get_sorted_population()
@@ -76,7 +78,8 @@ if __name__ == '__main__':
   '''
   POPULATION_SIZEs = [500, 600, 700, 800, 900]
   for POPULATION_SIZE in POPULATION_SIZEs:
-    N = 30
+    N = 10
+    K=0
     TAU = 0.5
     SELECT_SIZE = int(POPULATION_SIZE * (1.0 - TAU))
     NEW_DATA_SIZE = int(POPULATION_SIZE * TAU)
@@ -84,9 +87,9 @@ if __name__ == '__main__':
     MAX_EVAL_NUM = 2000 * N
     MAX_EVAL = N//3
 
-    FILE_NAME = "data/N={}/BOA_POP={}_N={}_3_deceptive_new={}.csv".format(N, POPULATION_SIZE, N, NEW_DATA_SIZE)
-
-    boa = Boa(POPULATION_SIZE, N, SELECT_SIZE, NEW_DATA_SIZE)
+    FILE_NAME = "data/N={}_K={}/BOA_POP={}_N={}_NKModel_K={}_new={}.csv".format(N, K, POPULATION_SIZE, N, K, NEW_DATA_SIZE)
+    dir_name = FILE_NAME.split("BOA")[0]
+    boa = Boa(POPULATION_SIZE, N, SELECT_SIZE, NEW_DATA_SIZE, K)
     boa.evaluate()
     boa.sort_population()
     

@@ -13,15 +13,29 @@ class BayesianNetwork:
     self.data = self._to_DataFrame(individual_array)
     self.nodes = None
 
+  def construct_network_by_k2_algorithm(self):
+    BIC_tables = self.create_bic_tables()
+    network = []
+    '''
+      貪欲法でスコア順に追加しつつ、すべての遺伝子組のスコアが負になるまでネットワーク構築
+    '''
+    return network
+
   def estimate(self):
-    estimated_network = HillClimbSearch(self.data)
-    self.network = estimated_network.estimate(max_indegree=2)
+    self.network = self.construct_network_by_k2_algorithm()
+    # estimated_network = HillClimbSearch(self.data)
+    # self.network = estimated_network.estimate(max_indegree=2)
 
   def fit(self):
     self.estimate()
     self.model = BayesianModel(list(self.network.edges()))
     self.model.add_nodes_from(list(self.network.nodes()))
-    self.model.fit(self.data)   
+    self.model.fit(self.data)
+
+  def create_bic_tables(self):
+    ## 前処理で(ペア, スコア)のテーブルを作る
+    tables = []
+    return tables
 
   def sample_data(self, new_data_size):
     inference = BayesianModelSampling(self.model)

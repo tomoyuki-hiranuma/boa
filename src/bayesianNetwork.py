@@ -17,7 +17,7 @@ class BayesianNetwork:
     BIC_tables = self.create_bic_tables()
     network = []
     '''
-      貪欲法でスコア順に追加しつつ、すべての遺伝子組のスコアが負になるまでネットワーク構築
+      貪欲法でスコア順に追加しつつ、すべての遺伝子組のスコアが負になるまでネットワーク構
     '''
     return network
 

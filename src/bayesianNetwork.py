@@ -34,8 +34,19 @@ class BayesianNetwork:
 
   def create_bic_tables(self):
     ## 前処理で(ペア, スコア)のテーブルを作る
+    ## self.dataに対して、全ての組み合わせのBICを計算
     tables = []
-    return tables
+    bic = BicScore(self.data)
+    for par_label, par_items in self.data.iteritems():
+      for child_label, child_items in self.data.iteritems():
+        if par_label != child_label:
+          model = BayesianModel([(par_label, child_label)])
+          print("parent: {}, child: {}".format(par_label, child_label))
+          print("BIC: {}".format(bic.score(model)))
+          tables.append((par_label, child_label, bic.score(model)))
+          print("-----------\n")
+    sorted_tables = sorted(tables, key=lambda x: x[2])[::-1]
+    return sorted_tables
 
   def sample_data(self, new_data_size):
     inference = BayesianModelSampling(self.model)
@@ -72,11 +83,13 @@ if __name__ == '__main__':
   pop1 = Population(POP_SIZE, N)
   # print(pop1)
   BN = BayesianNetwork(pop1.array)
+  bic_tables = BN.create_bic_tables()
+  print(np.array(bic_tables))
   # print(BN.data)
   # BN.estimate()
-  BN.fit()
-  cpds = BN.model.get_cpds()
-  for cpd in cpds:
-    print(cpd)
-  new_data = BN.sample_data(new_data_size=20)
-  print(new_data)
+  # BN.fit()
+  # cpds = BN.model.get_cpds()
+  # for cpd in cpds:
+  #   print(cpd)
+  # new_data = BN.sample_data(new_data_size=20)
+  # print(new_data)

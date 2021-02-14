@@ -10,11 +10,12 @@ class BayesianNetwork:
   def __init__(self, individual_array):
     self.network = None
     self.model = None
-    self.data = self._to_DataFrame(individual_array)
     self.nodes = None
+    self.data = self._to_DataFrame(individual_array)
 
   def construct_network_by_k2_algorithm(self):
     BIC_tables = self.create_bic_tables()
+    # エッジのみの配列として表す(親，子)
     network = []
     '''
       tableの上から順にノードとして追加
@@ -24,13 +25,13 @@ class BayesianNetwork:
 
   def estimate(self):
     self.network = self.construct_network_by_k2_algorithm()
-    # estimated_network = HillClimbSearch(self.data)
-    # self.network = estimated_network.estimate(max_indegree=2)
 
   def fit(self):
     self.estimate()
-    self.model = BayesianModel(list(self.network.edges()))
-    self.model.add_nodes_from(list(self.network.nodes()))
+    # 構築したネットワークのエッジを使う
+    self.model = BayesianModel(self.network)
+    # 独立なノードがあったとき
+    self.model.add_nodes_from(self.nodes)
     self.model.fit(self.data)
 
   def create_bic_tables(self):
@@ -42,10 +43,10 @@ class BayesianNetwork:
       for child_label, child_items in self.data.iteritems():
         if par_label != child_label:
           model = BayesianModel([(par_label, child_label)])
-          print("parent: {}, child: {}".format(par_label, child_label))
-          print("BIC: {}".format(bic.score(model)))
+          # print("parent: {}, child: {}".format(par_label, child_label))
+          # print("BIC: {}".format(bic.score(model)))
           tables.append((par_label, child_label, bic.score(model)))
-          print("-----------\n")
+          # print("-----------\n")
     sorted_tables = sorted(tables, key=lambda x: x[2])[::-1]
     return sorted_tables
 

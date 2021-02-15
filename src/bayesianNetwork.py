@@ -17,10 +17,21 @@ class BayesianNetwork:
     BIC_tables = self.create_bic_tables()
     # エッジのみの配列として表す(親，子)
     network = []
+    bic = BicScore(self.data)
     '''
       tableの上から順にノードとして追加
       貪欲法でスコア順に追加しつつ、すべての遺伝子組のスコアが負になるまでネットワーク構
     '''
+    '''
+        Todo: 閉路判定書く
+    '''
+    for parent_node, child_node, score in BIC_tables:
+      # print(parent_node, child_node, score)
+      network.append([parent_node, child_node])
+      model = BayesianModel(network)
+      # print(model.edges())
+      # print(bic.score(model))
+      # if bic.score(model) < 0
     return network
 
   def estimate(self):
@@ -34,6 +45,9 @@ class BayesianNetwork:
     self.model.add_nodes_from(self.nodes)
     self.model.fit(self.data)
 
+  '''
+    [親ノード, 子ノード, BICスコア]の配列
+  '''
   def create_bic_tables(self):
     ## 前処理で(ペア, スコア)のテーブルを作る
     ## self.dataに対して、全ての組み合わせのBICを計算
@@ -42,13 +56,13 @@ class BayesianNetwork:
     for par_label, par_items in self.data.iteritems():
       for child_label, child_items in self.data.iteritems():
         if par_label != child_label:
-          model = BayesianModel([(par_label, child_label)])
+          # print("local score")
           # print("parent: {}, child: {}".format(par_label, child_label))
-          # print("BIC: {}".format(bic.score(model)))
-          tables.append((par_label, child_label, bic.score(model)))
+          # print(bic.local_score(child_label, [par_label]))
+          tables.append((par_label, child_label, bic.local_score(child_label, [par_label])))
           # print("-----------\n")
     sorted_tables = sorted(tables, key=lambda x: x[2])[::-1]
-    return sorted_tables
+    return np.array(sorted_tables)
 
   def sample_data(self, new_data_size):
     inference = BayesianModelSampling(self.model)
@@ -80,13 +94,12 @@ class BayesianNetwork:
     return pd_data
 
 if __name__ == '__main__':
-  N = 4
-  POP_SIZE = 5
+  N = 3
+  POP_SIZE = 50
   pop1 = Population(POP_SIZE, N)
-  # print(pop1)
+  pop1.print_population()
   BN = BayesianNetwork(pop1.array)
-  bic_tables = BN.create_bic_tables()
-  print(np.array(bic_tables))
+  bic_tables = BN.construct_network_by_k2_algorithm()
   # print(BN.data)
   # BN.estimate()
   # BN.fit()

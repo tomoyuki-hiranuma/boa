@@ -69,6 +69,9 @@ class NKModel:
     return fitness
 
 	# 最適解計算
+  '''
+    メモ化で高速化できそう
+  '''
   def calc_optimization(self):
     best_gene = ""
     best_eval = 0.0

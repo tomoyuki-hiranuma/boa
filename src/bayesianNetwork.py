@@ -20,7 +20,7 @@ class BayesianNetwork:
     bic = BicScore(self.data)
     '''
       tableの上から順にノードとして追加
-      貪欲法でスコア順に追加しつつ、すべての遺伝子組のスコアが負になるまでネットワーク構
+      貪欲法でスコア順に追加しつつ、すべての遺伝子組のスコアが負になるまでネットワーク構築
     '''
     '''
         Todo: 閉路判定書く
@@ -29,9 +29,10 @@ class BayesianNetwork:
       # print(parent_node, child_node, score)
       network.append([parent_node, child_node])
       model = BayesianModel(network)
-      # print(model.edges())
-      # print(bic.score(model))
-      # if bic.score(model) < 0
+      print(model.edges())
+      print(bic.score(model))
+      # if bic.score(model) < 0:
+        # break
     return network
 
   def estimate(self):
@@ -97,7 +98,7 @@ if __name__ == '__main__':
   N = 3
   POP_SIZE = 50
   pop1 = Population(POP_SIZE, N)
-  pop1.print_population()
+  # pop1.print_population()
   BN = BayesianNetwork(pop1.array)
   bic_tables = BN.construct_network_by_k2_algorithm()
   # print(BN.data)

@@ -13,29 +13,6 @@ class BayesianNetwork:
     self.nodes = None
     self.data = self._to_DataFrame(individual_array)
 
-  # def construct_network_by_k2_algorithm(self):
-  #   BIC_tables = self.create_bic_tables()
-  #   # エッジのみの配列として表す(親，子)
-  #   network = []
-  #   bic = BicScore(self.data)
-  #   '''
-  #     tableの上から順にノードとして追加
-  #     貪欲法でスコア順に追加しつつ、すべての遺伝子組のスコアが負になるまでネットワーク構築
-  #     【フロー】
-  #     全てのノード間で最もBICスコアの高いノード間にエッジを張る（このときn個のノード、1つのエッジ）
-  #     エッジを保存した状態で全てのノード間のBICスコアを計算し、最も高いノード間にエッジを張る(このときn個のノード、2つのエッジ)
-  #     最終的にスコアが負になったら探索終了
-  #   '''
-  #   for parent_node, child_node, score in BIC_tables:
-  #     # print(parent_node, child_node, score)
-  #     network.append([parent_node, child_node])
-  #     model = BayesianModel(network)
-  #     print(model.edges())
-  #     print(bic.score(model))
-  #     # if bic.score(model) < 0:
-  #       # break
-  #   return network
-
   def estimate_network(self):
     self.network = self.construct_network_by_k2_algorithm()
 
@@ -47,10 +24,7 @@ class BayesianNetwork:
     self.model.add_nodes_from(self.nodes)
     self.model.fit(self.data)
 
-  '''
-    [親ノード, 子ノード, BICスコア]の配列
-  '''
-  def create_bic_tables(self):
+  def construct_network_by_k2_algorithm(self):
     '''
       K2アルゴリズム
       【フロー】
@@ -63,7 +37,7 @@ class BayesianNetwork:
     scores_table = np.ones((len(self.nodes), len(self.nodes)))*(-float('inf'))
     masks_table = np.eye(len(self.nodes), dtype=bool)
     bic = BicScore(self.data)
-    for _ in range(3):
+    for _ in range(5): ## while True にしてスコアが正になるまで
       scores_table = np.ones((len(self.nodes), len(self.nodes)))*(-float('inf'))
       print("{}回目".format(_+1))
       print(network)
@@ -78,11 +52,12 @@ class BayesianNetwork:
         # break
       print(scores_table)
       nodes_index = np.unravel_index(np.argmax(scores_table), scores_table.shape)
-      network.append(["X"+str(nodes_index[0]+1), "X"+str(nodes_index[1]+1)])
-      masks_table[nodes_index[0], nodes_index[1]] = True
-      masks_table[nodes_index[1], nodes_index[0]] = True
+      if not masks_table[nodes_index[0], nodes_index[1]]:
+        network.append(["X"+str(nodes_index[0]+1), "X"+str(nodes_index[1]+1)])
+        masks_table[nodes_index[0], nodes_index[1]] = True
+        masks_table[nodes_index[1], nodes_index[0]] = True
       print("結果:{}".format(network))
-    # return np.array(sorted_tables)
+    return network
 
   def sample_data(self, new_data_size):
     inference = BayesianModelSampling(self.model)
@@ -121,7 +96,7 @@ if __name__ == '__main__':
   for individual in pop1.array:
     individual.gene[2] = individual.gene[0] + individual.gene[1]
   BN = BayesianNetwork(pop1.array)
-  BN.create_bic_tables()
+  BN.construct_network_by_k2_algorithm()
   # print(BN.data)
   # BN.estimate()
   # BN.fit()

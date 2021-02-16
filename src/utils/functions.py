@@ -8,7 +8,7 @@
 '''
 import numpy as np
 from copy import deepcopy
-from src.individual import Individual
+from individual import Individual
 
 class Onemax:
   def __init__(self):
@@ -69,6 +69,9 @@ class NKModel:
     return fitness
 
 	# 最適解計算
+  '''
+    メモ化で高速化できそう
+  '''
   def calc_optimization(self):
     best_gene = ""
     best_eval = 0.0

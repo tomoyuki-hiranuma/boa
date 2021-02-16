@@ -49,8 +49,10 @@ class BayesianNetwork:
       current_model = BayesianModel(network)
       current_model.add_nodes_from(self.nodes)
       # テーブル再計算
-      for parent_index, parent_node in enumerate(self.nodes):
-        for child_index, child_node in enumerate(self.nodes):
+      for parent_index in range(len(self.nodes)):
+        for child_index in range(len(self.nodes[parent_index:])):
+          parent_node = self.nodes[parent_index]
+          child_node = self.nodes[parent_index + child_index]
           if not masks_table[parent_index, child_index] and self.is_dag(current_model, parent_node, child_node):
             network_candidate = BayesianModel(network)
             network_candidate.add_nodes_from(self.nodes)

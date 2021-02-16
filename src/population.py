@@ -1,5 +1,5 @@
 import numpy as np
-from src.individual import Individual
+from individual import Individual
 import csv
 
 class Population:

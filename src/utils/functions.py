@@ -8,7 +8,7 @@
 '''
 import numpy as np
 from copy import deepcopy
-from src.individual import Individual
+from individual import Individual
 
 class Onemax:
   def __init__(self):

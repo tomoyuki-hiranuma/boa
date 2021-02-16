@@ -4,7 +4,7 @@ from pgmpy.models import BayesianModel
 from copy import deepcopy
 from pgmpy.estimators import K2Score, BicScore, HillClimbSearch, ExhaustiveSearch
 from pgmpy.sampling import BayesianModelSampling
-from src.population import Population
+from population import Population
 
 class BayesianNetwork:
   def __init__(self, individual_array):
@@ -13,11 +13,17 @@ class BayesianNetwork:
     self.nodes = None
     self.data = self._to_DataFrame(individual_array)
 
-  def estimate_network(self):
+  def estimate_network_by_k2(self):
     self.network = self.construct_network_by_k2_algorithm()
 
+  def estimate_network_by_hillclimb(self):
+    estimater = HillClimbSearch(self.data)
+    best_model = estimater.estimate(scoring_method=BicScore(self.data))
+    self.network = list(best_model.edges())
+
   def fit(self):
-    self.estimate_network()
+    print("ネットワーク構築")
+    self.estimate_network_by_hillclimb()
     # 構築したネットワークのエッジを使う
     self.model = BayesianModel(self.network)
     # 独立なノードがあったとき
@@ -39,8 +45,11 @@ class BayesianNetwork:
     bic = BicScore(self.data)
     for _ in range(5): ## while True にしてスコアが正になるまで
       scores_table = np.ones((len(self.nodes), len(self.nodes)))*(-float('inf'))
+      current_model = BayesianModel(network)
       print("{}回目".format(_+1))
-      print(network)
+      print("edge: {}".format(network))
+      print("score: {}".format(bic.score(current_model)))
+      # テーブル再計算
       for parent_index, parent_node in enumerate(self.nodes):
         for child_index, child_node in enumerate(self.nodes):
           if not masks_table[parent_index, child_index]:
@@ -48,6 +57,10 @@ class BayesianNetwork:
             network_candidate.add_nodes_from(self.nodes)
             network_candidate.add_edge(parent_node, child_node)
             scores_table[parent_index, child_index] = bic.score(network_candidate)
+      '''
+        スコアが改善するなら改善させる
+        しないなら終了
+      '''
       # if np.max(scores_table) < 0:
         # break
       print(scores_table)

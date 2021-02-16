@@ -66,7 +66,6 @@ class BayesianNetwork:
               スコア方法違う
             '''
             scores_table[parent_index, child_index] = self.get_k2_score(network_candidate)
-            print(network_candidate.edges())
       selected_nodes_index = np.unravel_index(np.argmax(scores_table), scores_table.shape)
       if masks_table[selected_nodes_index[0], selected_nodes_index[1]]:
         continue

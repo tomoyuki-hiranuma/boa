@@ -50,9 +50,10 @@ class BayesianNetwork:
       current_model.add_nodes_from(self.nodes)
       # テーブル再計算
       for parent_index in range(len(self.nodes)):
-        for child_index in range(len(self.nodes[parent_index:])):
+        for diff_index in range(len(self.nodes[parent_index:])):
+          child_index = parent_index + diff_index
           parent_node = self.nodes[parent_index]
-          child_node = self.nodes[parent_index + child_index]
+          child_node = self.nodes[child_index]
           if not masks_table[parent_index, child_index] and self.is_dag(current_model, parent_node, child_node):
             network_candidate = BayesianModel(network)
             network_candidate.add_nodes_from(self.nodes)
@@ -71,7 +72,7 @@ class BayesianNetwork:
       network.append(["X"+str(selected_nodes_index[0]+1), "X"+str(selected_nodes_index[1]+1)])
       masks_table[selected_nodes_index[0], selected_nodes_index[1]] = True
       masks_table[selected_nodes_index[1], selected_nodes_index[0]] = True
-      print("結果:{}".format(network))
+    print("結果:{}".format(network))
     return network
 
   def is_proceed_ok(self, network, score_table, added_nodes_index):

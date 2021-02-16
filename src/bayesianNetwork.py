@@ -54,10 +54,16 @@ class BayesianNetwork:
           child_index = parent_index + diff_index
           parent_node = self.nodes[parent_index]
           child_node = self.nodes[child_index]
+          '''
+            親ノード数に制限つける
+          '''
           if not masks_table[parent_index, child_index] and self.is_dag(current_model, parent_node, child_node):
             network_candidate = BayesianModel(network)
             network_candidate.add_nodes_from(self.nodes)
             network_candidate.add_edge(parent_node, child_node)
+            '''
+              スコア方法違う
+            '''
             scores_table[parent_index, child_index] = self.get_k2_score(network_candidate)
             print(network_candidate.edges())
       selected_nodes_index = np.unravel_index(np.argmax(scores_table), scores_table.shape)

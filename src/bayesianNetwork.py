@@ -78,6 +78,10 @@ class BayesianNetwork:
       score += self.local_bic_score(node, model.predecessors(node))
     return score
 
+  '''
+  todo: 論文のBICに書き換える必要あり
+  だいぶ付け焼き刃
+  '''
   def local_bic_score(self, variable, parents):
     bic = BicScore(self.data)
     var_state = bic.state_names[variable] # 着目ノードが何の値を取るのか

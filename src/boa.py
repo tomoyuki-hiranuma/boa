@@ -8,7 +8,7 @@ import numpy as np
 import datetime
 
 class Boa:
-  def __init__(self, population_size, individual_size, select_size, new_data_size, K=-1):
+  def __init__(self, population_size, individual_size, select_size, new_data_size, max_indegree, K=-1):
     self.population_size = population_size # populationから取得可能→いらない
     self.individual_size = individual_size # populationから取得可能→いらない
     self.select_size = select_size
@@ -17,6 +17,7 @@ class Boa:
     self.bayesianNetwork = None # BayesianNetwork(self.population.array)
     self.selected_population = None # いらなくなるかも
     self.function = ThreeDeceptive()
+    self.max_indegree = max_indegree
     if K != -1:
       self.function.calc_optimization()
 
@@ -48,7 +49,7 @@ class Boa:
     self.population = self.get_sorted_population()
 
   def create_network(self, selected_array):
-    self.bayesianNetwork = BayesianNetwork(selected_array)
+    self.bayesianNetwork = BayesianNetwork(selected_array, self.max_indegree)
 
   def evaluate(self):
     for individual in self.population.array:
@@ -85,13 +86,14 @@ if __name__ == '__main__':
   NEW_DATA_SIZE = int(POPULATION_SIZE * TAU)
   MAX_EXPERIMENT = 10
   MAX_EVAL_NUM = 2000 * N
+  MAX_INDEGREE = 2
 
   for i in range(MAX_EXPERIMENT):
     FILE_NAME = "data/3-deceptive/{}/N={}/BOA_POP={}_N={}_trial{}.csv".format(str(datetime.date.today()), N,POPULATION_SIZE, N, i+1)
     dir_name = FILE_NAME.split("/BOA")[0]
 
     
-    boa = Boa(POPULATION_SIZE, N, SELECT_SIZE, NEW_DATA_SIZE)
+    boa = Boa(POPULATION_SIZE, N, SELECT_SIZE, NEW_DATA_SIZE, MAX_INDEGREE)
 
     '''
       3-deceptiveのとき
@@ -135,8 +137,8 @@ if __name__ == '__main__':
       print("best eval: {}".format(best_eval))
       print("Best network: {}".format(boa.bayesianNetwork.network))
       is_converge = boa.is_convergence()
-      if generation%5 == 0 or is_converge or best_eval >= OPT_EVAL * optimal_rate:
-        boa.output_to_csv(FILE_NAME, generation)
+      # if generation%5 == 0 or is_converge or best_eval >= OPT_EVAL * optimal_rate:
+      boa.output_to_csv(FILE_NAME, generation)
 
     boa.population.print_head_population()
     print("mean eval: {}".format(mean_eval))

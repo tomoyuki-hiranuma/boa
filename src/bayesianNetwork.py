@@ -9,11 +9,12 @@ from pgmpy.sampling import BayesianModelSampling
 from population import Population
 
 class BayesianNetwork:
-  def __init__(self, individual_array):
+  def __init__(self, individual_array, u):
     self.network = [] # 
     self.model = None # BayesianModelクラスのインスタ
     self.nodes = None # nodeのリスト
     self.data = self._to_DataFrame(individual_array) # pandas.DataFrame
+    self.max_indegree = u
 
   def estimate_network_by_k2(self):
     self.network = self.construct_network_by_k2_algorithm()
@@ -57,7 +58,7 @@ class BayesianNetwork:
           '''
             親ノード数に制限つける
           '''
-          if not masks_table[parent_index, child_index] and self.is_dag(current_model, parent_node, child_node):
+          if not masks_table[parent_index, child_index] and self.is_dag(current_model, parent_node, child_node) and len(list(current_model.predecessors(child_node))) < self.max_indegree:
             network_candidate = BayesianModel(network)
             network_candidate.add_nodes_from(self.nodes)
             network_candidate.add_edge(parent_node, child_node)

@@ -9,11 +9,12 @@ from pgmpy.sampling import BayesianModelSampling
 from population import Population
 
 class BayesianNetwork:
-  def __init__(self, individual_array):
+  def __init__(self, individual_array, u):
     self.network = [] # 
     self.model = None # BayesianModelクラスのインスタ
     self.nodes = None # nodeのリスト
     self.data = self._to_DataFrame(individual_array) # pandas.DataFrame
+    self.max_indegree = u
 
   def estimate_network_by_k2(self):
     self.network = self.construct_network_by_k2_algorithm()
@@ -49,12 +50,21 @@ class BayesianNetwork:
       current_model = BayesianModel(network)
       current_model.add_nodes_from(self.nodes)
       # テーブル再計算
-      for parent_index, parent_node in enumerate(self.nodes):
-        for child_index, child_node in enumerate(self.nodes):
-          if not masks_table[parent_index, child_index] and self.is_dag(current_model, parent_node, child_node):
+      for parent_index in range(len(self.nodes)):
+        for diff_index in range(len(self.nodes[parent_index:])):
+          child_index = parent_index + diff_index
+          parent_node = self.nodes[parent_index]
+          child_node = self.nodes[child_index]
+          '''
+            親ノード数に制限つける
+          '''
+          if not masks_table[parent_index, child_index] and self.is_dag(current_model, parent_node, child_node) and len(list(current_model.predecessors(child_node))) < self.max_indegree:
             network_candidate = BayesianModel(network)
             network_candidate.add_nodes_from(self.nodes)
             network_candidate.add_edge(parent_node, child_node)
+            '''
+              スコア方法違う
+            '''
             scores_table[parent_index, child_index] = self.get_k2_score(network_candidate)
       selected_nodes_index = np.unravel_index(np.argmax(scores_table), scores_table.shape)
       if masks_table[selected_nodes_index[0], selected_nodes_index[1]]:
@@ -68,7 +78,6 @@ class BayesianNetwork:
       network.append(["X"+str(selected_nodes_index[0]+1), "X"+str(selected_nodes_index[1]+1)])
       masks_table[selected_nodes_index[0], selected_nodes_index[1]] = True
       masks_table[selected_nodes_index[1], selected_nodes_index[0]] = True
-      print(network)
     print("結果:{}".format(network))
     return network
 

@@ -5,9 +5,10 @@ from utils.functions import Onemax, ThreeDeceptive, NKModel
 from copy import deepcopy
 import csv
 import numpy as np
+import datetime
 
 class Boa:
-  def __init__(self, population_size, individual_size, select_size, new_data_size, K=-1):
+  def __init__(self, population_size, individual_size, select_size, new_data_size, max_indegree, K=-1):
     self.population_size = population_size # populationから取得可能→いらない
     self.individual_size = individual_size # populationから取得可能→いらない
     self.select_size = select_size
@@ -15,7 +16,8 @@ class Boa:
     self.population = Population(population_size, individual_size)
     self.bayesianNetwork = None # BayesianNetwork(self.population.array)
     self.selected_population = None # いらなくなるかも
-    self.function = Onemax()
+    self.function = ThreeDeceptive()
+    self.max_indegree = max_indegree
     if K != -1:
       self.function.calc_optimization()
 
@@ -47,7 +49,7 @@ class Boa:
     self.population = self.get_sorted_population()
 
   def create_network(self, selected_array):
-    self.bayesianNetwork = BayesianNetwork(selected_array)
+    self.bayesianNetwork = BayesianNetwork(selected_array, self.max_indegree)
 
   def evaluate(self):
     for individual in self.population.array:
@@ -78,77 +80,79 @@ if __name__ == '__main__':
     NEW_DATA_SIZE: BNから生成される個体群サイズ 下位個体群の半分が入れ変わる
   '''
   POPULATION_SIZE = 100
-  N = 15
+  N = 30
   TAU = 0.5
   SELECT_SIZE = int(POPULATION_SIZE * (1.0 - TAU))
   NEW_DATA_SIZE = int(POPULATION_SIZE * TAU)
-  MAX_EXPERIMENT = 30
+  MAX_EXPERIMENT = 10
   MAX_EVAL_NUM = 2000 * N
+  MAX_INDEGREE = 2
 
-  # FILE_NAME = "data/NK_model/N={}_K={}/BOA_POP={}_N={}_NKModel_K={}_new={}.csv".format(N, K, POPULATION_SIZE, N, K, NEW_DATA_SIZE)
-  # dir_name = FILE_NAME.split("/BOA")[0]
+  for i in range(MAX_EXPERIMENT):
+    FILE_NAME = "data/3-deceptive/{}/N={}/BOA_POP={}_N={}_trial{}.csv".format(str(datetime.date.today()), N,POPULATION_SIZE, N, i+1)
+    dir_name = FILE_NAME.split("/BOA")[0]
 
-  
-  boa = Boa(POPULATION_SIZE, N, SELECT_SIZE, NEW_DATA_SIZE)
+    
+    boa = Boa(POPULATION_SIZE, N, SELECT_SIZE, NEW_DATA_SIZE, MAX_INDEGREE)
 
-  '''
-    3-deceptiveのとき
-      OPT_EVAL = N//3
-    NK-Modelのとき
-      OPT_EVAL = boa.function.get_best_eval
-  '''
-  # OPT_EVAL = boa.function.get_best_eval
-  # opt_gene = boa.function.get_best_gene
+    '''
+      3-deceptiveのとき
+        OPT_EVAL = N//3
+      NK-Modelのとき
+        OPT_EVAL = boa.function.get_best_eval
+    '''
+    # OPT_EVAL = boa.function.get_best_eval
+    # opt_gene = boa.function.get_best_gene
 
-  OPT_EVAL = N
+    OPT_EVAL = N//3
 
-  boa.evaluate()
-  boa.sort_population()
-  
-  generation = 0
-  eval_num = 0
-  mean_eval = 0.0
-  best_eval = 0.0
-  is_converge = False
-  optimal_rate = 1.0
+    boa.evaluate()
+    boa.sort_population()
+    
+    generation = 0
+    eval_num = 0
+    mean_eval = 0.0
+    best_eval = 0.0
+    is_converge = False
+    optimal_rate = 1.0
 
-  # os.makedirs(dir_name, exist_ok=True)
-  # header = ['generation', 'individual', 'fitness']
-  # with open(FILE_NAME, 'w') as f:
-  #   writer = csv.writer(f)
-  #   writer.writerow(header)
-  #   writer.writerow(["opt", opt_gene, OPT_EVAL])
-  #   writer.writerow(["START!"])
+    os.makedirs(dir_name, exist_ok=True)
+    header = ['generation', 'individual', 'fitness']
+    with open(FILE_NAME, 'w') as f:
+      writer = csv.writer(f)
+      writer.writerow(header)
+      writer.writerow(["START!"])
 
-  # boa.output_to_csv(FILE_NAME, generation)
+    boa.output_to_csv(FILE_NAME, generation)
 
-  while eval_num < MAX_EVAL_NUM and best_eval < OPT_EVAL * optimal_rate and not is_converge:
-    print("第{}世代".format(generation + 1))
-    boa.do_one_generation()
-    generation += 1
-    eval_num += NEW_DATA_SIZE
-    mean_eval = boa.get_mean_eval()
-    best_eval = boa.get_best_eval()
+    while eval_num < MAX_EVAL_NUM and best_eval < OPT_EVAL * optimal_rate and not is_converge:
+      print("第{}世代".format(generation + 1))
+      boa.do_one_generation()
+      generation += 1
+      eval_num += NEW_DATA_SIZE
+      mean_eval = boa.get_mean_eval()
+      best_eval = boa.get_best_eval()
+      boa.population.print_head_population()
+      print("mean eval: {}".format(mean_eval))
+      print("best eval: {}".format(best_eval))
+      print("Best network: {}".format(boa.bayesianNetwork.network))
+      is_converge = boa.is_convergence()
+      # if generation%5 == 0 or is_converge or best_eval >= OPT_EVAL * optimal_rate:
+      boa.output_to_csv(FILE_NAME, generation)
+
     boa.population.print_head_population()
     print("mean eval: {}".format(mean_eval))
     print("best eval: {}".format(best_eval))
-    is_converge = boa.is_convergence()
-    # if generation%5 == 0 or is_converge or best_eval >= OPT_EVAL * optimal_rate:
-      # boa.output_to_csv(FILE_NAME, generation)
-
-  boa.population.print_head_population()
-  # print("mean eval: {}".format(mean_eval))
-  # print("best eval: {}".format(best_eval))
-  # with open(FILE_NAME, 'a') as f:
-  #   writer = csv.writer(f)
-  #   writer.writerow(["EOF"])
-  #   if is_converge:
-  #     print("収束して失敗")
-  #     writer.writerow(["fail"])
-  #   elif best_eval >= OPT_EVAL * optimal_rate:
-  #     print("成功")
-  #     print(boa.bayesianNetwork.network.edges())
-  #     writer.writerow(["success"])
-  #   else:
-  #     print("評価回数の限界値のため失敗")
-  #     writer.writerow(["fail"])
+    with open(FILE_NAME, 'a') as f:
+      writer = csv.writer(f)
+      writer.writerow(["EOF"])
+      if is_converge:
+        print("収束して失敗")
+        writer.writerow(["fail"])
+      elif best_eval >= OPT_EVAL * optimal_rate:
+        print("成功")
+        writer.writerow(["success"])
+      else:
+        print("評価回数の限界値のため失敗")
+        writer.writerow(["fail"])
+      writer.writerow(boa.bayesianNetwork.network)

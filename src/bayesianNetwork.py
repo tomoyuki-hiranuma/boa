@@ -25,7 +25,7 @@ class BayesianNetwork:
 
   def fit(self):
     print("ネットワーク構築")
-    self.estimate_network_by_hillclimb()
+    self.estimate_network_by_k2()
     # 構築したネットワークのエッジを使う
     self.model = BayesianModel(self.network)
     # 独立なノードがあったとき
@@ -44,13 +44,10 @@ class BayesianNetwork:
     ## self.dataに対して、今のネットワークにおいて全ての組み合わせのBICを計算
     scores_table = np.ones((len(self.nodes), len(self.nodes)))*(-float('inf'))
     masks_table = np.eye(len(self.nodes), dtype=bool)
-    for _ in range(5): ## while True にしてスコアが正になるまで
+    while True:
       scores_table = np.ones((len(self.nodes), len(self.nodes)))*(-float('inf'))
       current_model = BayesianModel(network)
       current_model.add_nodes_from(self.nodes)
-      print("{}回目".format(_+1))
-      print("edge: {}".format(network))
-      print("score: {}".format(self.get_bic_score(current_model))) # エントロピーが加算されてない
       # テーブル再計算
       for parent_index, parent_node in enumerate(self.nodes):
         for child_index, child_node in enumerate(self.nodes):
@@ -58,8 +55,8 @@ class BayesianNetwork:
             network_candidate = BayesianModel(network)
             network_candidate.add_nodes_from(self.nodes)
             network_candidate.add_edge(parent_node, child_node)
-            scores_table[parent_index, child_index] = self.get_bic_score(network_candidate)
-      print(scores_table)
+            scores_table[parent_index, child_index] = self.get_k2_score(network_candidate)
+            print(network_candidate.edges())
       selected_nodes_index = np.unravel_index(np.argmax(scores_table), scores_table.shape)
       if masks_table[selected_nodes_index[0], selected_nodes_index[1]]:
         continue
@@ -85,7 +82,7 @@ class BayesianNetwork:
     candidate_model.add_nodes_from(self.nodes)
     candidate_model.add_edge(parent_node, child_node)
 
-    if self.get_bic_score(candidate_model) >= self.get_bic_score(current_model):
+    if self.get_k2_score(candidate_model) >= self.get_k2_score(current_model):
       return True
     return False
 
@@ -95,6 +92,9 @@ class BayesianNetwork:
       score += self.local_bic_score(node, model.predecessors(node))
     return score
 
+  def get_k2_score(self, model):
+    k2 = K2Score(self.data)
+    return k2.score(model)
   '''
   todo: 論文のBICに書き換える必要あり
   だいぶ付け焼き刃

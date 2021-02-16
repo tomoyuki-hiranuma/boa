@@ -3,6 +3,7 @@ import numpy as np
 from pgmpy.models import BayesianModel
 from copy import deepcopy
 from math import log
+import networkx as nx
 from pgmpy.estimators import K2Score, BicScore, HillClimbSearch, ExhaustiveSearch
 from pgmpy.sampling import BayesianModelSampling
 from population import Population
@@ -46,13 +47,14 @@ class BayesianNetwork:
     for _ in range(5): ## while True にしてスコアが正になるまで
       scores_table = np.ones((len(self.nodes), len(self.nodes)))*(-float('inf'))
       current_model = BayesianModel(network)
+      current_model.add_nodes_from(self.nodes)
       print("{}回目".format(_+1))
       print("edge: {}".format(network))
       print("score: {}".format(self.get_bic_score(current_model))) # エントロピーが加算されてない
       # テーブル再計算
       for parent_index, parent_node in enumerate(self.nodes):
         for child_index, child_node in enumerate(self.nodes):
-          if not masks_table[parent_index, child_index]:
+          if not masks_table[parent_index, child_index] and self.is_dag(current_model, parent_node, child_node):
             network_candidate = BayesianModel(network)
             network_candidate.add_nodes_from(self.nodes)
             network_candidate.add_edge(parent_node, child_node)
@@ -62,7 +64,7 @@ class BayesianNetwork:
         しないなら終了
       '''
       # if np.max(scores_table) < 0:
-        # break
+      #   break
       print(scores_table)
       nodes_index = np.unravel_index(np.argmax(scores_table), scores_table.shape)
       if not masks_table[nodes_index[0], nodes_index[1]]:
@@ -109,6 +111,13 @@ class BayesianNetwork:
     sampled_data = inference.forward_sample(size=new_data_size, return_type='dataframe')
     sampled_data = self.get_data_sorted_by_columns(sampled_data)
     return sampled_data.to_numpy()
+
+  def is_dag(self, model, u, v):
+    if u == v:
+      return False
+    if u in model.nodes() and v in model.nodes() and nx.has_path(model, v, u):
+      return False
+    return True
 
   def get_data_sorted_by_columns(self, data):
     list_col_sorted = data.columns.to_list()

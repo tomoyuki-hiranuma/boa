@@ -98,6 +98,7 @@ class BayesianNetwork:
   '''
   todo: 論文のBICに書き換える必要あり
   だいぶ付け焼き刃
+  自作可能
   '''
   def local_bic_score(self, variable, parents):
     bic = BicScore(self.data)

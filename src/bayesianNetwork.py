@@ -2,16 +2,17 @@ import pandas as pd
 import numpy as np
 from pgmpy.models import BayesianModel
 from copy import deepcopy
+from math import log
 from pgmpy.estimators import K2Score, BicScore, HillClimbSearch, ExhaustiveSearch
 from pgmpy.sampling import BayesianModelSampling
 from population import Population
 
 class BayesianNetwork:
   def __init__(self, individual_array):
-    self.network = []
-    self.model = None
-    self.nodes = None
-    self.data = self._to_DataFrame(individual_array)
+    self.network = [] # 
+    self.model = None # BayesianModelクラスのインスタ
+    self.nodes = None # nodeのリスト
+    self.data = self._to_DataFrame(individual_array) # pandas.DataFrame
 
   def estimate_network_by_k2(self):
     self.network = self.construct_network_by_k2_algorithm()
@@ -42,13 +43,12 @@ class BayesianNetwork:
     ## self.dataに対して、今のネットワークにおいて全ての組み合わせのBICを計算
     scores_table = np.ones((len(self.nodes), len(self.nodes)))*(-float('inf'))
     masks_table = np.eye(len(self.nodes), dtype=bool)
-    bic = BicScore(self.data)
     for _ in range(5): ## while True にしてスコアが正になるまで
       scores_table = np.ones((len(self.nodes), len(self.nodes)))*(-float('inf'))
       current_model = BayesianModel(network)
       print("{}回目".format(_+1))
       print("edge: {}".format(network))
-      print("score: {}".format(bic.score(current_model)))
+      print("score: {}".format(self.get_bic_score(current_model))) # エントロピーが加算されてない
       # テーブル再計算
       for parent_index, parent_node in enumerate(self.nodes):
         for child_index, child_node in enumerate(self.nodes):
@@ -56,7 +56,7 @@ class BayesianNetwork:
             network_candidate = BayesianModel(network)
             network_candidate.add_nodes_from(self.nodes)
             network_candidate.add_edge(parent_node, child_node)
-            scores_table[parent_index, child_index] = bic.score(network_candidate)
+            scores_table[parent_index, child_index] = self.get_bic_score(network_candidate)
       '''
         スコアが改善するなら改善させる
         しないなら終了
@@ -71,6 +71,34 @@ class BayesianNetwork:
         masks_table[nodes_index[1], nodes_index[0]] = True
       print("結果:{}".format(network))
     return network
+
+  def get_bic_score(self, model):
+    score = 0
+    for node in model.nodes():
+      score += self.local_bic_score(node, model.predecessors(node))
+    return score
+
+  def local_bic_score(self, variable, parents):
+    bic = BicScore(self.data)
+    var_state = bic.state_names[variable] # 着目ノードが何の値を取るのか
+    var_cardinality = len(var_state) # 着目ノードの取れる値の数、すなわち濃度
+    state_counts = bic.state_counts(variable, parents) # 親ノードに対する着目ノードのデータの数
+    sample_size = len(self.data)  # 総データ数
+    num_parents_states = float(state_counts.shape[1]) # 親ノードの出力の組み合わせ数
+
+    counts = np.asarray(state_counts) # state_countsをnp.arrayにする
+    log_likelihoods = np.zeros_like(counts, dtype=np.float_) # countsと同様のshapeの0の配列を生成
+    # countsの自然対数を取る.出力形式はlog_likelihoodsの形で正の値に対してのみ対数を取る
+    counts = np.log(counts, out=log_likelihoods, where=counts > 0)
+
+    log_conditionals = np.sum(counts, axis=0, dtype=np.float_) # countsを縦に総和
+    log_conditionals = np.log(log_conditionals, out=log_conditionals, where=log_conditionals > 0)
+
+    log_likelihoods -= log_conditionals
+    log_likelihoods *= counts
+    score = np.sum(log_likelihoods)
+    score -= 0.5 * log(sample_size) * num_parents_states * (var_cardinality - 1)
+    return score
 
   def sample_data(self, new_data_size):
     inference = BayesianModelSampling(self.model)

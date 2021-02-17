@@ -64,14 +64,15 @@ class BayesianNetwork:
             '''
             scores_table[parent_index, child_index] = self.get_k2_score(network_candidate)
       selected_nodes_index = np.unravel_index(np.argmax(scores_table), scores_table.shape)
-      if masks_table[selected_nodes_index[0], selected_nodes_index[1]]:
-        continue
       '''
         スコアが改善するなら改善させる
         しないなら終了
       '''
       if not self.is_proceed_ok(network, scores_table, selected_nodes_index):
         break
+
+      if masks_table[selected_nodes_index[0], selected_nodes_index[1]]:
+        continue
       network.append(["X"+str(selected_nodes_index[0]+1), "X"+str(selected_nodes_index[1]+1)])
       masks_table[selected_nodes_index[0], selected_nodes_index[1]] = True
       masks_table[selected_nodes_index[1], selected_nodes_index[0]] = True

@@ -55,9 +55,6 @@ class BayesianNetwork:
           child_index = parent_index + diff_index
           parent_node = self.nodes[parent_index]
           child_node = self.nodes[child_index]
-          '''
-            親ノード数に制限つける
-          '''
           if not masks_table[parent_index, child_index] and self.is_dag(current_model, parent_node, child_node) and len(list(current_model.predecessors(child_node))) < self.max_indegree:
             network_candidate = BayesianModel(network)
             network_candidate.add_nodes_from(self.nodes)
@@ -104,6 +101,7 @@ class BayesianNetwork:
   def get_k2_score(self, model):
     k2 = K2Score(self.data)
     return k2.score(model)
+
   '''
   todo: 論文のBICに書き換える必要あり
   だいぶ付け焼き刃

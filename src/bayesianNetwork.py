@@ -34,6 +34,7 @@ class BayesianNetwork:
     self.model.fit(self.data)
 
     '''
+      K2アルゴリズム
       【フロー】
       全てのノード間で最もBICスコアの高いノード間にエッジを張る（このときn個のノード、1つのエッジ）
       エッジを保存した状態で全てのノード間のBICスコアを計算し、最も高いノード間にエッジを張る(このときn個のノード、2つのエッジ)
@@ -73,7 +74,7 @@ class BayesianNetwork:
         if selected_parent_node == None:
           break
         
-        # print("candidate parent: ", selected_parent_node)
+        print("candidate parent: ", selected_parent_node)
         new_model = BayesianModel(network)
         new_model.add_nodes_from(self.nodes)
         new_model.add_edge(selected_parent_node, child_node)

@@ -80,8 +80,8 @@ if __name__ == '__main__':
     NEW_DATA_SIZE: BNから生成される個体群サイズ 下位個体群の半分が入れ変わる
   '''
 
-  POPULATION_SIZE = 1000
-  N = 30
+  POPULATION_SIZE = 3300
+  N = 60
   TAU = 0.5
   SELECT_SIZE = int(POPULATION_SIZE * (1.0 - TAU))
   NEW_DATA_SIZE = int(POPULATION_SIZE * TAU)

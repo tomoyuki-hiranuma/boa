@@ -33,54 +33,58 @@ class BayesianNetwork:
     self.model.add_nodes_from(self.nodes)
     self.model.fit(self.data)
 
-  def construct_network_by_k2_algorithm(self):
     '''
-      K2アルゴリズム
       【フロー】
       全てのノード間で最もBICスコアの高いノード間にエッジを張る（このときn個のノード、1つのエッジ）
       エッジを保存した状態で全てのノード間のBICスコアを計算し、最も高いノード間にエッジを張る(このときn個のノード、2つのエッジ)
       最終的にスコアが負になったら探索終了
     '''
+  def construct_network_by_k2_algorithm(self):
     network = []
-    ## self.dataに対して、今のネットワークにおいて全ての組み合わせのBICを計算
-    scores_table = np.ones((len(self.nodes), len(self.nodes)))*(-float('inf'))
     masks_table = np.eye(len(self.nodes), dtype=bool)
-    while True:
-      scores_table = np.ones((len(self.nodes), len(self.nodes)))*(-float('inf'))
+    for child_index in range(len(self.nodes)):
       current_model = BayesianModel(network)
       current_model.add_nodes_from(self.nodes)
-      # テーブル再計算
-      for parent_index in range(len(self.nodes)):
-        for diff_index in range(len(self.nodes[parent_index:])):
-          child_index = parent_index + diff_index
+      ok_to_proceed = True
+      child_node = self.nodes[child_index]
+      while ok_to_proceed and len(list(current_model.predecessors(child_node))) < self.max_indegree:
+        # 最大となる親ノード候補を抽出
+        max_score = -float('inf')
+        selected_parent_node = None
+        for diff_index in range(len(self.nodes[child_index:])):
+          parent_index = child_index + diff_index
           parent_node = self.nodes[parent_index]
-          child_node = self.nodes[child_index]
-          if not masks_table[parent_index, child_index] and self.is_dag(current_model, parent_node, child_node) and len(list(current_model.predecessors(child_node))) < self.max_indegree:
-            network_candidate = BayesianModel(network)
-            network_candidate.add_nodes_from(self.nodes)
-            network_candidate.add_edge(parent_node, child_node)
-            '''
-              スコア方法違う
-            '''
-            scores_table[parent_index, child_index] = self.get_k2_score(network_candidate)
-      selected_nodes_index = np.unravel_index(np.argmax(scores_table), scores_table.shape)
-      '''
-        スコアが改善するなら改善させる
-        しないなら終了
-      '''
-      if not self.is_proceed_ok(network, scores_table, selected_nodes_index):
-        break
+          if child_index == parent_index:
+            continue
+          if masks_table[child_index, parent_index] or not self.is_dag(current_model, parent_node, child_node):
+            continue
 
-      if masks_table[selected_nodes_index[0], selected_nodes_index[1]]:
-        break
+          network_candidate = BayesianModel(network)
+          network_candidate.add_nodes_from(self.nodes)
+          network_candidate.add_edge(parent_node, child_node)
+          current_score = self.get_k2_score(network_candidate)
+          # 最大スコアのノード発見
+          if current_score > max_score:
+            max_score = current_score
+            selected_parent_index = parent_index
+            selected_parent_node = parent_node
 
-      if self.is_dag(current_model, selected_nodes_index[0], selected_nodes_index[1]):
-        break
-      
-      network.append(["X"+str(selected_nodes_index[0]+1), "X"+str(selected_nodes_index[1]+1)])
-      masks_table[selected_nodes_index[0], selected_nodes_index[1]] = True
-      masks_table[selected_nodes_index[1], selected_nodes_index[0]] = True
-    print("結果:{}".format(network))
+        # 見つからなかった
+        if selected_parent_node == None:
+          break
+        
+        # print("candidate parent: ", selected_parent_node)
+        new_model = BayesianModel(network)
+        new_model.add_nodes_from(self.nodes)
+        new_model.add_edge(selected_parent_node, child_node)
+        if self.get_k2_score(new_model) > self.get_k2_score(current_model):
+          network.append([selected_parent_node, child_node])
+          current_model.add_edge(selected_parent_node, child_node)
+          masks_table[selected_parent_index, child_index] = True
+          masks_table[child_index, selected_parent_index] = True
+        else:
+          ok_to_proceed = False
+        print("network:",network)
     return network
 
   def is_proceed_ok(self, network, score_table, added_nodes_index):

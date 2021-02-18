@@ -72,7 +72,11 @@ class BayesianNetwork:
         break
 
       if masks_table[selected_nodes_index[0], selected_nodes_index[1]]:
-        continue
+        break
+
+      if self.is_dag(current_model, selected_nodes_index[0], selected_nodes_index[1]):
+        break
+      
       network.append(["X"+str(selected_nodes_index[0]+1), "X"+str(selected_nodes_index[1]+1)])
       masks_table[selected_nodes_index[0], selected_nodes_index[1]] = True
       masks_table[selected_nodes_index[1], selected_nodes_index[0]] = True
@@ -183,7 +187,7 @@ if __name__ == '__main__':
   # pop1.print_population()
   for individual in pop1.array:
     individual.gene[2] = individual.gene[0] + individual.gene[1]
-  BN = BayesianNetwork(pop1.array)
+  BN = BayesianNetwork(pop1.array, 2)
   BN.construct_network_by_k2_algorithm()
   # print(BN.data)
   # BN.estimate()

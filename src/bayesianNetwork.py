@@ -25,7 +25,7 @@ class BayesianNetwork:
     self.network = list(best_model.edges())
 
   def fit(self):
-    # print("ネットワーク構築")
+    print("ネットワーク構築")
     self.estimate_network_by_k2()
     # 構築したネットワークのエッジを使う
     self.model = BayesianModel(self.network)
@@ -44,49 +44,58 @@ class BayesianNetwork:
     network = []
     masks_table = np.eye(len(self.nodes), dtype=bool)
     for child_index in range(len(self.nodes)):
-      current_model = BayesianModel(network)
-      current_model.add_nodes_from(self.nodes)
-      ok_to_proceed = True
       child_node = self.nodes[child_index]
-      while ok_to_proceed and len(list(current_model.predecessors(child_node))) < self.max_indegree:
+      # 空の親に対してスコア計算
+      local_network = []
+      old_model = BayesianModel()
+      old_model.add_nodes_from(self.nodes)
+      old_score = self.get_k2_score(old_model)
+      ok_to_proceed = True
+      while ok_to_proceed and len(local_network) < self.max_indegree:
         # 最大となる親ノード候補を抽出
-        max_score = -float('inf')
-        selected_parent_node = None
-        for diff_index in range(len(self.nodes[child_index:])):
-          parent_index = child_index + diff_index
-          parent_node = self.nodes[parent_index]
-          if child_index == parent_index:
-            continue
-          if masks_table[child_index, parent_index] or not self.is_dag(current_model, parent_node, child_node):
-            continue
+        parent_candidate_node, parent_candidate_index = self.get_candidate_info(child_index, masks_table)
 
-          network_candidate = BayesianModel(network)
-          network_candidate.add_nodes_from(self.nodes)
-          network_candidate.add_edge(parent_node, child_node)
-          current_score = self.get_k2_score(network_candidate)
-          # 最大スコアのノード発見
-          if current_score > max_score:
-            max_score = current_score
-            selected_parent_index = parent_index
-            selected_parent_node = parent_node
-
-        # 見つからなかった
-        if selected_parent_node == None:
-          break
-        
-        # print("candidate parent: ", selected_parent_node)
-        new_model = BayesianModel(network)
+        if parent_candidate_node == None:
+          ok_to_proceed = False
+          continue
+        print("candidate parent: ", parent_candidate_node, ", child:", child_node)
+        new_model = BayesianModel(local_network)
         new_model.add_nodes_from(self.nodes)
-        new_model.add_edge(selected_parent_node, child_node)
-        if self.get_k2_score(new_model) > self.get_k2_score(current_model):
-          network.append([selected_parent_node, child_node])
-          current_model.add_edge(selected_parent_node, child_node)
-          masks_table[selected_parent_index, child_index] = True
-          masks_table[child_index, selected_parent_index] = True
+        new_model.add_edge(parent_candidate_node, child_node)
+        if self.get_k2_score(new_model) > self.get_k2_score(old_model):
+          network.append([parent_candidate_node, child_node])
+          local_network.append([parent_candidate_node, child_node])
+          old_model = new_model.copy()
+          masks_table[child_index, parent_candidate_index] = True
         else:
           ok_to_proceed = False
+        print("current network", network)
     print("selected network:",network)
     return network
+
+  def get_candidate_info(self, child_index, masks_table):
+    child_node = self.nodes[child_index]
+    max_score = -float('inf')
+    selected_parent_node = None
+    selected_parent_index = -1
+    for diff_index in range(len(self.nodes[child_index:])):
+      parent_index = child_index + diff_index
+      parent_node = self.nodes[parent_index]
+      if child_index == parent_index:
+        continue
+      if masks_table[child_index, parent_index]:
+        continue
+      #　エッジ間のスコアが最大になる親ノードを探索
+      candidate_edge = BayesianModel([[parent_node, child_node]])
+      candidate_edge.add_nodes_from(self.nodes)
+      current_score = self.get_k2_score(candidate_edge)
+      # 最大スコアのノード発見
+      if current_score > max_score:
+        max_score = current_score
+        selected_parent_index = parent_index
+        selected_parent_node = parent_node
+    return selected_parent_node, selected_parent_index
+
 
   def is_proceed_ok(self, network, score_table, added_nodes_index):
     parent_node = "X"+str(added_nodes_index[0]+1)

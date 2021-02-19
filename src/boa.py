@@ -80,8 +80,8 @@ if __name__ == '__main__':
     NEW_DATA_SIZE: BNから生成される個体群サイズ 下位個体群の半分が入れ変わる
   '''
 
-  POPULATION_SIZE = 4000
-  N = 60
+  POPULATION_SIZE = 10000
+  N = 45
   TAU = 0.5
   SELECT_SIZE = int(POPULATION_SIZE * (1.0 - TAU))
   NEW_DATA_SIZE = int(POPULATION_SIZE * TAU)
@@ -125,7 +125,7 @@ if __name__ == '__main__':
 
   boa.output_to_csv(FILE_NAME, generation)
 
-  while eval_num < MAX_EVAL_NUM:
+  while best_eval < OPT_EVAL:
     print("第{}世代".format(generation + 1))
     boa.do_one_generation()
     generation += 1

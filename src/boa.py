@@ -80,8 +80,8 @@ if __name__ == '__main__':
     NEW_DATA_SIZE: BNから生成される個体群サイズ 下位個体群の半分が入れ変わる
   '''
 
-  POPULATION_SIZE = 1000
-  N = 30
+  POPULATION_SIZE = 4000
+  N = 60
   TAU = 0.5
   SELECT_SIZE = int(POPULATION_SIZE * (1.0 - TAU))
   NEW_DATA_SIZE = int(POPULATION_SIZE * TAU)
@@ -89,71 +89,70 @@ if __name__ == '__main__':
   MAX_EVAL_NUM = 2000 * N
   MAX_INDEGREE = 2
 
-  for i in range(MAX_EXPERIMENT):
-    FILE_NAME = "data/3-deceptive/{}/N={}/BOA_POP={}_N={}_trial{}.csv".format(str(datetime.date.today()), N,POPULATION_SIZE, N, i+1)
-    dir_name = FILE_NAME.split("/BOA")[0]
+  FILE_NAME = "data/3-deceptive/{}/N={}/BOA_POP={}_N={}_trial_infinite.csv".format(str(datetime.date.today()), N,POPULATION_SIZE, N)
+  dir_name = FILE_NAME.split("/BOA")[0]
 
-    
-    boa = Boa(POPULATION_SIZE, N, SELECT_SIZE, NEW_DATA_SIZE, MAX_INDEGREE)
+  
+  boa = Boa(POPULATION_SIZE, N, SELECT_SIZE, NEW_DATA_SIZE, MAX_INDEGREE)
 
-    '''
-      3-deceptiveのとき
-        OPT_EVAL = N//3
-      NK-Modelのとき
-        OPT_EVAL = boa.function.get_best_eval
-    '''
-    # OPT_EVAL = boa.function.get_best_eval
-    # opt_gene = boa.function.get_best_gene
+  '''
+    3-deceptiveのとき
+      OPT_EVAL = N//3
+    NK-Modelのとき
+      OPT_EVAL = boa.function.get_best_eval
+  '''
+  # OPT_EVAL = boa.function.get_best_eval
+  # opt_gene = boa.function.get_best_gene
 
-    OPT_EVAL = N//3
+  OPT_EVAL = N//3
 
-    boa.evaluate()
-    boa.sort_population()
-    
-    generation = 0
-    eval_num = 0
-    mean_eval = 0.0
-    best_eval = 0.0
-    is_converge = False
-    optimal_rate = 1.0
+  boa.evaluate()
+  boa.sort_population()
+  
+  generation = 0
+  eval_num = 0
+  mean_eval = 0.0
+  best_eval = 0.0
+  is_converge = False
+  optimal_rate = 1.0
 
-    os.makedirs(dir_name, exist_ok=True)
-    header = ['generation', 'individual', 'fitness']
-    with open(FILE_NAME, 'w') as f:
-      writer = csv.writer(f)
-      writer.writerow(header)
-      writer.writerow(["START!"])
+  os.makedirs(dir_name, exist_ok=True)
+  header = ['generation', 'individual', 'fitness']
+  with open(FILE_NAME, 'w') as f:
+    writer = csv.writer(f)
+    writer.writerow(header)
+    writer.writerow(["START!"])
 
-    boa.output_to_csv(FILE_NAME, generation)
+  boa.output_to_csv(FILE_NAME, generation)
 
-    while eval_num < MAX_EVAL_NUM and best_eval < OPT_EVAL * optimal_rate and not is_converge:
-      print("第{}世代".format(generation + 1))
-      boa.do_one_generation()
-      generation += 1
-      eval_num += NEW_DATA_SIZE
-      mean_eval = boa.get_mean_eval()
-      best_eval = boa.get_best_eval()
-      boa.population.print_head_population()
-      print("mean eval: {}".format(mean_eval))
-      print("best eval: {}".format(best_eval))
-      print("Best network: {}".format(boa.bayesianNetwork.network))
-      is_converge = boa.is_convergence()
-      # if generation%5 == 0 or is_converge or best_eval >= OPT_EVAL * optimal_rate:
-      boa.output_to_csv(FILE_NAME, generation)
-
+  while eval_num < MAX_EVAL_NUM:
+    print("第{}世代".format(generation + 1))
+    boa.do_one_generation()
+    generation += 1
+    eval_num += NEW_DATA_SIZE
+    mean_eval = boa.get_mean_eval()
+    best_eval = boa.get_best_eval()
     boa.population.print_head_population()
     print("mean eval: {}".format(mean_eval))
     print("best eval: {}".format(best_eval))
-    with open(FILE_NAME, 'a') as f:
-      writer = csv.writer(f)
-      writer.writerow(["EOF"])
-      if is_converge:
-        print("収束して失敗")
-        writer.writerow(["fail"])
-      elif best_eval >= OPT_EVAL * optimal_rate:
-        print("成功")
-        writer.writerow(["success"])
-      else:
-        print("評価回数の限界値のため失敗")
-        writer.writerow(["fail"])
-      writer.writerow(boa.bayesianNetwork.network)
+    print("Best network: {}".format(boa.bayesianNetwork.network))
+    is_converge = boa.is_convergence()
+    if generation%5 == 0 or best_eval >= OPT_EVAL * optimal_rate:
+      boa.output_to_csv(FILE_NAME, generation)
+
+  boa.population.print_head_population()
+  print("mean eval: {}".format(mean_eval))
+  print("best eval: {}".format(best_eval))
+  with open(FILE_NAME, 'a') as f:
+    writer = csv.writer(f)
+    writer.writerow(["EOF"])
+    if is_converge:
+      print("収束して失敗")
+      writer.writerow(["fail"])
+    elif best_eval >= OPT_EVAL * optimal_rate:
+      print("成功")
+      writer.writerow(["success"])
+    else:
+      print("評価回数の限界値のため失敗")
+      writer.writerow(["fail"])
+    writer.writerow(boa.bayesianNetwork.network)

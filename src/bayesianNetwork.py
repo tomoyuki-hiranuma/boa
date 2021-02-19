@@ -25,7 +25,7 @@ class BayesianNetwork:
     self.network = list(best_model.edges())
 
   def fit(self):
-    print("ネットワーク構築")
+    # print("ネットワーク構築")
     self.estimate_network_by_k2()
     # 構築したネットワークのエッジを使う
     self.model = BayesianModel(self.network)
@@ -74,7 +74,7 @@ class BayesianNetwork:
         if selected_parent_node == None:
           break
         
-        print("candidate parent: ", selected_parent_node)
+        # print("candidate parent: ", selected_parent_node)
         new_model = BayesianModel(network)
         new_model.add_nodes_from(self.nodes)
         new_model.add_edge(selected_parent_node, child_node)
@@ -85,7 +85,7 @@ class BayesianNetwork:
           masks_table[child_index, selected_parent_index] = True
         else:
           ok_to_proceed = False
-        print("network:",network)
+    print("selected network:",network)
     return network
 
   def is_proceed_ok(self, network, score_table, added_nodes_index):

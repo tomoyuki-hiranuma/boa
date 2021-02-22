@@ -1,4 +1,5 @@
 import os
+import sys
 from population import Population
 from bayesianNetwork import BayesianNetwork
 from utils.functions import Onemax, ThreeDeceptive, NKModel
@@ -66,6 +67,10 @@ class Boa:
 
   def output_to_csv(self, file_name, generation):
     self.population.output_to_csv(file_name, generation)
+  
+  def output_distribution_info(self, file_name, generation):
+    self.population.output_distribution_info(file_name, generation)
+
 
   def is_convergence(self):
     return self.population.is_convergence()
@@ -80,8 +85,9 @@ if __name__ == '__main__':
     NEW_DATA_SIZE: BNから生成される個体群サイズ 下位個体群の半分が入れ変わる
   '''
 
-  POPULATION_SIZE = 10000
-  N = 45
+  POPULATION_SIZE = int(sys.argv[1])
+  N = int(sys.argv[2])
+  trial = int(sys.argv[3])
   TAU = 0.5
   SELECT_SIZE = int(POPULATION_SIZE * (1.0 - TAU))
   NEW_DATA_SIZE = int(POPULATION_SIZE * TAU)
@@ -89,7 +95,12 @@ if __name__ == '__main__':
   MAX_EVAL_NUM = 2000 * N
   MAX_INDEGREE = 2
 
-  FILE_NAME = "data/3-deceptive/{}/N={}/BOA_POP={}_N={}_trial_infinite.csv".format(str(datetime.date.today()), N,POPULATION_SIZE, N)
+  if N%3 != 0:
+    raise "N must be multiple of 3."
+  if not (1 <= trial and trial <= 10):
+    raise "trial number must be between 1 and 10."
+
+  FILE_NAME = "data/3-deceptive/N={}/POP={}/BOA_POP={}_N={}_trial.csv".format(N, POPULATION_SIZE, POPULATION_SIZE, N, trial)
   dir_name = FILE_NAME.split("/BOA")[0]
 
   
@@ -117,13 +128,12 @@ if __name__ == '__main__':
   optimal_rate = 1.0
 
   os.makedirs(dir_name, exist_ok=True)
-  header = ['generation', 'individual', 'fitness']
+  header = ['generation', 'max_score', 'mean_score', 'min_score', 'variance_score']
   with open(FILE_NAME, 'w') as f:
     writer = csv.writer(f)
     writer.writerow(header)
-    writer.writerow(["START!"])
 
-  boa.output_to_csv(FILE_NAME, generation)
+  boa.output_distribution_info(FILE_NAME, generation)
 
   while best_eval < OPT_EVAL:
     print("第{}世代".format(generation + 1))
@@ -136,9 +146,7 @@ if __name__ == '__main__':
     print("mean eval: {}".format(mean_eval))
     print("best eval: {}".format(best_eval))
     print("Best network: {}".format(boa.bayesianNetwork.network))
-    is_converge = boa.is_convergence()
-    if generation%5 == 0 or best_eval >= OPT_EVAL * optimal_rate:
-      boa.output_to_csv(FILE_NAME, generation)
+    boa.output_distribution_info(FILE_NAME, generation)
 
   boa.population.print_head_population()
   print("mean eval: {}".format(mean_eval))
@@ -146,10 +154,7 @@ if __name__ == '__main__':
   with open(FILE_NAME, 'a') as f:
     writer = csv.writer(f)
     writer.writerow(["EOF"])
-    if is_converge:
-      print("収束して失敗")
-      writer.writerow(["fail"])
-    elif best_eval >= OPT_EVAL * optimal_rate:
+    if best_eval >= OPT_EVAL * optimal_rate:
       print("成功")
       writer.writerow(["success"])
     else:

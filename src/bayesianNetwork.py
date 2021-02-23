@@ -58,7 +58,7 @@ class BayesianNetwork:
         if parent_candidate_node == None:
           ok_to_proceed = False
           continue
-        print("candidate parent: ", parent_candidate_node, ", child:", child_node)
+        # print("candidate parent: ", parent_candidate_node, ", child:", child_node)
         new_model = BayesianModel(local_network)
         new_model.add_nodes_from(self.nodes)
         new_model.add_edge(parent_candidate_node, child_node)
@@ -69,7 +69,7 @@ class BayesianNetwork:
           masks_table[child_index, parent_candidate_index] = True
         else:
           ok_to_proceed = False
-        print("current network", network)
+        # print("current network", network)
     print("selected network:",network)
     return network
 

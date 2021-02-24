@@ -1,11 +1,15 @@
 import numpy as np
 from individual import Individual
 import csv
+from copy import deepcopy
 
 class Population:
   def __init__(self, population_size, individual_size):
     self.array = np.array([Individual(individual_size) for i in range(population_size) ])
     self.individual_size = individual_size
+
+  def copy(self):
+    return deepcopy(self)
 
   def set_array(self, array):
     self.array = np.array([Individual(self.individual_size) for gene in array])

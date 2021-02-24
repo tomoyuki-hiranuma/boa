@@ -12,9 +12,8 @@ class Population:
     return deepcopy(self)
 
   def set_array(self, array):
-    self.array = np.array([Individual(self.individual_size) for gene in array])
-    for index, individual in enumerate(self.array):
-      individual.set_gene(array[index])
+    for i in range(len(self.array)):
+      self.array[i].set_gene(array[i])
 
   def is_convergence(self):
     array = np.array([individual.gene for individual in self.array])

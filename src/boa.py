@@ -43,6 +43,7 @@ class Boa:
 
   def get_sorted_population(self):
     sorted_population = deepcopy(self.population)
+    np.random.shuffle(sorted_population.array)
     sorted_population.array = sorted(sorted_population.array, key=lambda x: x.fitness)[::-1]
     return sorted_population
 
@@ -102,7 +103,7 @@ if __name__ == '__main__':
 
   FILE_NAME = "data/jsai/3-deceptive/N={}/POP={}/BOA_POP={}_N={}_trial{}.csv".format(N, POPULATION_SIZE, POPULATION_SIZE, N, trial)
   dir_name = FILE_NAME.split("/BOA")[0]
-
+  np.random.seed(trial)
   
   boa = Boa(POPULATION_SIZE, N, SELECT_SIZE, NEW_DATA_SIZE, MAX_INDEGREE)
 

@@ -86,9 +86,9 @@ class BayesianNetwork:
       if masks_table[child_index, parent_index]:
         continue
       #　エッジ間のスコアが最大になる親ノードを探索
-      candidate_edge = BayesianModel([[parent_node, child_node]])
-      candidate_edge.add_nodes_from(self.nodes)
-      current_score = self.get_k2_score(candidate_edge)
+      candidate_model = BayesianModel([[parent_node, child_node]])
+      candidate_model.add_nodes_from(self.nodes)
+      current_score = self.get_k2_score(candidate_model)
       # 最大スコアのノード発見
       if current_score > max_score:
         max_score = current_score

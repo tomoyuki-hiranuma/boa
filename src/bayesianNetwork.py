@@ -109,12 +109,6 @@ class BayesianNetwork:
       return False
     return True
 
-  def get_parent_number(self, parents):
-    number = 0
-    for parent in parents:
-      number += 1
-    return number
-
   def get_data_sorted_by_columns(self, data):
     list_col_sorted = data.columns.to_list()
     list_col_sorted.sort()

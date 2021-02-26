@@ -68,7 +68,7 @@ class BayesianNetwork:
           old_model = new_model.copy()
         else:
           ok_to_proceed = False
-    print("selected network:",network)
+    print("selected network:", network)
     return network
 
   def get_candidate_info(self, child_index):

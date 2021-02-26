@@ -72,7 +72,6 @@ class Boa:
   def output_distribution_info(self, file_name, generation):
     self.population.output_distribution_info(file_name, generation)
 
-
   def is_convergence(self):
     return self.population.is_convergence()
 

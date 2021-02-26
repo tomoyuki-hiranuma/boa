@@ -7,7 +7,6 @@ import networkx as nx
 from pgmpy.estimators import K2Score, BicScore, HillClimbSearch, ExhaustiveSearch
 from pgmpy.sampling import BayesianModelSampling
 from population import Population
-import time
 
 class BayesianNetwork:
   def __init__(self, individual_array, u):
@@ -23,7 +22,7 @@ class BayesianNetwork:
 
   def estimate_network_by_hillclimb(self):
     estimater = HillClimbSearch(self.data)
-    best_model = estimater.estimate(scoring_method=BicScore(self.data))
+    best_model = estimater.estimate(scoring_method=self.metric)
     self.network = list(best_model.edges())
 
   def fit(self):
@@ -69,7 +68,6 @@ class BayesianNetwork:
           old_model = new_model.copy()
         else:
           ok_to_proceed = False
-        # print("current network", network)
     print("selected network:",network)
     return network
 

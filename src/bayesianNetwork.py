@@ -42,7 +42,6 @@ class BayesianNetwork:
     '''
   def construct_network_by_k2_algorithm(self):
     network = []
-    masks_table = np.eye(len(self.nodes), dtype=bool)
     for child_index in range(len(self.nodes)):
       child_node = self.nodes[child_index]
       # 空の親に対してスコア計算
@@ -53,7 +52,7 @@ class BayesianNetwork:
       ok_to_proceed = True
       while ok_to_proceed and len(local_network) < self.max_indegree:
         # 最大となる親ノード候補を抽出
-        parent_candidate_node, parent_candidate_index = self.get_candidate_info(child_index, masks_table)
+        parent_candidate_node, parent_candidate_index = self.get_candidate_info(child_index)
 
         if parent_candidate_node == None:
           ok_to_proceed = False
@@ -66,14 +65,13 @@ class BayesianNetwork:
           network.append([parent_candidate_node, child_node])
           local_network.append([parent_candidate_node, child_node])
           old_model = new_model.copy()
-          masks_table[child_index, parent_candidate_index] = True
         else:
           ok_to_proceed = False
         # print("current network", network)
     print("selected network:",network)
     return network
 
-  def get_candidate_info(self, child_index, masks_table):
+  def get_candidate_info(self, child_index):
     child_node = self.nodes[child_index]
     max_score = -float('inf')
     selected_parent_node = None
@@ -82,8 +80,6 @@ class BayesianNetwork:
       parent_index = child_index + diff_index
       parent_node = self.nodes[parent_index]
       if child_index == parent_index:
-        continue
-      if masks_table[child_index, parent_index]:
         continue
       #　エッジ間のスコアが最大になる親ノードを探索
       candidate_model = BayesianModel([[parent_node, child_node]])
@@ -95,21 +91,6 @@ class BayesianNetwork:
         selected_parent_index = parent_index
         selected_parent_node = parent_node
     return selected_parent_node, selected_parent_index
-
-
-  def is_proceed_ok(self, network, score_table, added_nodes_index):
-    parent_node = "X"+str(added_nodes_index[0]+1)
-    child_node = "X"+str(added_nodes_index[1]+1)
-
-    current_model = BayesianModel(network)
-    current_model.add_nodes_from(self.nodes)
-    candidate_model = BayesianModel(network)
-    candidate_model.add_nodes_from(self.nodes)
-    candidate_model.add_edge(parent_node, child_node)
-
-    if self.get_k2_score(candidate_model) >= self.get_k2_score(current_model):
-      return True
-    return False
 
   def get_bic_score(self, model):
     score = 0

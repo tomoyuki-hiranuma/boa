@@ -7,6 +7,7 @@ import networkx as nx
 from pgmpy.estimators import K2Score, BicScore, HillClimbSearch, ExhaustiveSearch
 from pgmpy.sampling import BayesianModelSampling
 from population import Population
+import time
 
 class BayesianNetwork:
   def __init__(self, individual_array, u):
@@ -76,20 +77,24 @@ class BayesianNetwork:
     max_score = -float('inf')
     selected_parent_node = None
     selected_parent_index = -1
+    candidate_model = BayesianModel()
+    candidate_model.add_nodes_from(self.nodes)
     for diff_index in range(len(self.nodes[child_index:])):
       parent_index = child_index + diff_index
       parent_node = self.nodes[parent_index]
       if child_index == parent_index:
         continue
       #　エッジ間のスコアが最大になる親ノードを探索
-      candidate_model = BayesianModel([[parent_node, child_node]])
-      candidate_model.add_nodes_from(self.nodes)
+      candidate_model.add_edge(parent_node, child_node)
       current_score = self.get_k2_score(candidate_model)
       # 最大スコアのノード発見
       if current_score > max_score:
         max_score = current_score
         selected_parent_index = parent_index
         selected_parent_node = parent_node
+      candidate_model.remove_node(parent_node)
+      candidate_model.remove_node(child_node)
+      candidate_model.add_nodes_from([parent_node, child_node])
     return selected_parent_node, selected_parent_index
 
   def get_bic_score(self, model):
@@ -176,14 +181,17 @@ class BayesianNetwork:
     return pd_data
 
 if __name__ == '__main__':
-  N = 3
-  POP_SIZE = 50
+  N = 45
+  POP_SIZE = 5000
   pop1 = Population(POP_SIZE, N)
   # pop1.print_population()
   for individual in pop1.array:
     individual.gene[2] = individual.gene[0] + individual.gene[1]
   BN = BayesianNetwork(pop1.array, 2)
+  start_time = time.time()
   BN.construct_network_by_k2_algorithm()
+  end_time = time.time()
+  print("spending time: {}".format(end_time - start_time))
   # print(BN.data)
   # BN.estimate()
   # BN.fit()

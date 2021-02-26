@@ -96,43 +96,6 @@ class BayesianNetwork:
       candidate_model.remove_edge(parent_node, child_node)
     return selected_parent_node, selected_parent_index
 
-  def get_bic_score(self, model):
-    score = 0
-    for node in model.nodes():
-      score += self.local_bic_score(node, model.predecessors(node))
-    return score
-
-  '''
-  todo: 論文のBICに書き換える必要あり
-  だいぶ付け焼き刃
-  自作可能
-  '''
-  def local_bic_score(self, variable, parents):
-    bic = BicScore(self.data)
-    var_state = bic.state_names[variable] # 着目ノードが何の値を取るのか
-    var_cardinality = len(var_state) # 着目ノードの取れる値の数、すなわち濃度
-    state_counts = bic.state_counts(variable, parents) # 親ノードに対する着目ノードのデータの数
-    sample_size = len(self.data)  # 総データ数
-    num_parents_states = float(state_counts.shape[1]) # 親ノードの出力の組み合わせ数
-    number_of_parent = self.get_parent_number(parents)
-
-    counts = np.asarray(state_counts) # state_countsをnp.arrayにする
-    log_likelihoods = np.zeros_like(counts, dtype=np.float_) # countsと同様のshapeの0の配列を生成
-    # countsの自然対数を取る.出力形式はlog_likelihoodsの形で正の値に対してのみ対数を取る
-    np.log(counts, out=log_likelihoods, where=counts > 0)
-
-    log_conditionals = np.sum(counts, axis=0, dtype=np.float_) # countsを縦に総和
-    np.log(log_conditionals, out=log_conditionals, where=log_conditionals > 0)
-
-    log_likelihoods -= log_conditionals
-    log_likelihoods *= counts
-
-    score = np.sum(log_likelihoods)
-    score -= 0.5 * log(sample_size) * num_parents_states * (var_cardinality - 1)
-    # entropy = np.sum(log_likelihoods)
-    # score = - entropy * sample_size - 2 ** (number_of_parent) *  log2(sample_size) * 0.5
-    return score
-
   def sample_data(self, new_data_size):
     inference = BayesianModelSampling(self.model)
     sampled_data = inference.forward_sample(size=new_data_size, return_type='dataframe')

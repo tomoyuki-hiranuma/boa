@@ -138,15 +138,4 @@ if __name__ == '__main__':
   for individual in pop1.array:
     individual.gene[2] = individual.gene[0] + individual.gene[1]
   BN = BayesianNetwork(pop1.array, 2)
-  start_time = time.time()
   BN.construct_network_by_k2_algorithm()
-  end_time = time.time()
-  print("spending time: {}".format(end_time - start_time))
-  # print(BN.data)
-  # BN.estimate()
-  # BN.fit()
-  # cpds = BN.model.get_cpds()
-  # for cpd in cpds:
-  #   print(cpd)
-  # new_data = BN.sample_data(new_data_size=20)
-  # print(new_data)

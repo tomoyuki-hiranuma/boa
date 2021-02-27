@@ -25,9 +25,6 @@ if __name__ == '__main__':
 
   for i in range(10):
     trial = i+1
-    if trial == 9:
-      continue
-
     file_name = "data/jsai/3-deceptive/N={}/POP={}/BOA_POP={}_N={}_trial{}.csv".format(N, POPULATION_SIZE, POPULATION_SIZE, N, trial)
 
     eval_number = get_eval_number(file_name, POPULATION_SIZE//2)

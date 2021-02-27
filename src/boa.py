@@ -97,7 +97,7 @@ if __name__ == '__main__':
 
   if N%3 != 0:
     raise "N must be multiple of 3."
-  if not (1 <= trial and trial <= 11):
+  if not (1 <= trial and trial <= 10):
     raise "trial number must be between 1 and 10."
 
   FILE_NAME = "data/jsai/3-deceptive/N={}/POP={}/BOA_POP={}_N={}_trial{}.csv".format(N, POPULATION_SIZE, POPULATION_SIZE, N, trial)

@@ -92,7 +92,6 @@ if __name__ == '__main__':
   SELECT_SIZE = int(POPULATION_SIZE * (1.0 - TAU))
   NEW_DATA_SIZE = int(POPULATION_SIZE * TAU)
   MAX_EXPERIMENT = 10
-  MAX_EVAL_NUM = 2000 * N
   MAX_INDEGREE = 2
 
   if N%3 != 0:

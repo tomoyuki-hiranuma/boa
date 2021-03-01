@@ -134,7 +134,6 @@ if __name__ == '__main__':
   N = 45
   POP_SIZE = 5000
   pop1 = Population(POP_SIZE, N)
-  # pop1.print_population()
   for individual in pop1.array:
     individual.gene[2] = individual.gene[0] + individual.gene[1]
   BN = BayesianNetwork(pop1.array, 2)
